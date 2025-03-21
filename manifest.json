@@ -1,0 +1,57 @@
+{
+  "manifest_version": 2,
+  "name": "Show Me More",
+  "version": "1.0.0",
+  "description": "Navigate through image sequences, record and share image collections",
+  "author": "LAUVz",
+  "homepage_url": "http://showmemore.eu/",
+  "icons": {
+    "48": "icons/show-me-more-48.png",
+    "96": "icons/show-me-more-96.png"
+  },
+  "permissions": [
+    "tabs",
+    "storage",
+    "contextMenus",
+    "notifications",
+    "webRequest",
+    "<all_urls>"
+  ],
+  "browser_action": {
+    "default_icon": {
+      "16": "icons/show-me-more-16.png",
+      "32": "icons/show-me-more-32.png"
+    },
+    "default_title": "Show Me More",
+    "default_popup": "popup/popup.html"
+  },
+  "background": {
+    "scripts": ["background/background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/content.js"],
+      "css": ["content/content.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    "icons/add_recorded_icon.svg",
+    "icons/add_recorded_icon_dark.svg"
+  ],
+  "commands": {
+    "prev-image": {
+      "suggested_key": { "default": "Alt+Left" },
+      "description": "Go to previous image in sequence"
+    },
+    "next-image": {
+      "suggested_key": { "default": "Alt+Right" },
+      "description": "Go to next image in sequence"
+    },
+    "show-all": {
+      "suggested_key": { "default": "Alt+A" },
+      "description": "Show all images in sequence"
+    }
+  }
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Show Me More Gallery</title>
+  <link rel="stylesheet" href="gallery.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-content">
+      <div class="logo-container">
+        <img src="../icons/show-me-more-48.png" alt="Show Me More Logo" class="logo">
+        <h1>Show Me More</h1>
+      </div>
+      <div class="actions">
+        <div class="button-row">
+          <button id="button-create-link" class="button primary">Create Link to Share</button>
+          <button id="button-adjust-size" class="button">Adjust Images Size</button>
+          <button id="button-stop-crawling" class="button danger">Stop Crawling</button>
+        </div>
+        <div id="share-container" class="share-container hidden">
+          <input type="text" id="share-link" class="share-link" readonly>
+          <button id="copy-button" class="button">Copy</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="gallery-container" class="gallery-container">
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p id="loading-text">Loading images...</p>
+    </div>
+    <div id="empty-state" class="empty-state hidden">
+      <img src="../icons/empty-state.svg" alt="No images found" class="empty-icon">
+      <h2>No Images Found</h2>
+      <p>Either you haven't recorded any images yet, or we couldn't find any related images in the sequence.</p>
+    </div>
+    <div id="image-container" class="image-container hidden"></div>
+    <div id="load-more-container" class="load-more-container hidden">
+      <button id="load-more-button" class="button">Load 100 More Images</button>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2025 | <a href="http://showmemore.eu/" target="_blank">Show Me More</a></p>
+    <p class="disclaimer">We can't be held responsible for any trouble resulting from the use of Show Me More</p>
+  </footer>
+
+  <script src="gallery.js"></script>
+</body>
+</html>

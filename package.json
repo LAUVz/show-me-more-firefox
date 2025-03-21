@@ -1,0 +1,20 @@
+{
+  "name": "show-me-more",
+  "version": "1.0.0",
+  "description": "Navigate through image sequences, record and share image collections",
+  "private": true,
+  "scripts": {
+    "build": "tsc && webpack",
+    "watch": "webpack --watch",
+    "package": "npm run build && web-ext build -s dist/ -a packages/"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^10.2.4",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.5.5",
+    "web-ext": "^7.2.0",
+    "webpack": "^5.68.0",
+    "webpack-cli": "^4.9.2",
+    "@types/firefox-webext-browser": "^94.0.1"
+  }
+}

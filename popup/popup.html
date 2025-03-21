@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Show Me More</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="../icons/show-me-more-48.png" alt="Show Me More Logo" class="logo">
+      <h1>Show Me More</h1>
+    </header>
+
+    <div class="controls">
+      <button id="prev-button" class="nav-button" title="Previous Image (Alt+Left)">
+        <span class="icon">◀</span> Previous
+      </button>
+      <button id="next-button" class="nav-button" title="Next Image (Alt+Right)">
+        Next <span class="icon">▶</span>
+      </button>
+      <button id="show-all-button" class="button" title="Show All Images in Sequence (Alt+A)">
+        Show All
+      </button>
+      <button id="show-all-before-button" class="nav-button" title="Show All Previous Images (Alt+A+Left)">
+        <span class="icon">◀</span> Show All Before
+      </button>
+      <button id="show-all-after-button" class="nav-button" title="Show All Next Images (Alt+A+Right)">
+        Show All After <span class="icon">▶</span>
+      </button>
+    </div>
+
+    <div class="recording-section">
+      <div class="recording-header">
+        <h2>Recording</h2>
+        <div class="toggle-wrapper">
+          <label class="toggle">
+            <input type="checkbox" id="recording-toggle">
+            <span class="slider"></span>
+          </label>
+          <span id="recording-status">Off</span>
+        </div>
+      </div>
+
+      <div class="recorded-count">
+        <span id="count-badge">0</span> images recorded
+      </div>
+
+      <div class="recorded-actions">
+        <button id="view-recorded-button" class="button">View All Recorded</button>
+        <button id="clear-recorded-button" class="button danger">Clear Recorded</button>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <p>Recording images? Hover over any large image and click the + button to add it to your collection.</p>
+      <p>Navigate image sequences using the buttons above or keyboard shortcuts.</p>
+    </div>
+
+    <footer>
+      <button id="about-button" class="text-button">About</button>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

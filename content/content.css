@@ -1,0 +1,94 @@
+/* Show Me More - Content Styles */
+
+:root {
+  --button-shadow: rgba(0, 0, 0, 0.5);
+  --nav-bg-color: rgba(240, 240, 244, 0.9);
+  --nav-border-color: #d7d7db;
+  --nav-button-color: #333;
+  --nav-button-hover-bg: #e0e0e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --button-shadow: rgba(0, 0, 0, 0.7);
+    --nav-bg-color: rgba(42, 42, 46, 0.9);
+    --nav-border-color: #4a4a4f;
+    --nav-button-color: #f9f9fa;
+    --nav-button-hover-bg: #4a4a4f;
+  }
+}
+
+.smm-record-button {
+  opacity: 0.9;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.smm-record-button:hover {
+  opacity: 1;
+}
+
+.smm-record-button img {
+  filter: drop-shadow(0px 1px 2px var(--button-shadow));
+}
+
+/* Navigation Panel */
+.smm-nav-panel {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--nav-bg-color);
+  border: 1px solid var(--nav-border-color);
+  border-radius: 8px;
+  padding: 6px;
+  display: flex;
+  gap: 4px;
+  z-index: 9999;
+  box-shadow: 0 2px 8px var(--button-shadow);
+  transition: all 0.3s ease;
+  cursor: move;
+}
+
+.smm-nav-panel.smm-panel-collapsed {
+  padding: 6px;
+  border-radius: 50%;
+}
+
+.smm-nav-panel.smm-panel-collapsed .smm-nav-button:not(.smm-toggle-button) {
+  display: none;
+}
+
+.smm-nav-button {
+  background: none;
+  border: none;
+  color: var(--nav-button-color);
+  font-size: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.smm-nav-button:hover {
+  background-color: var(--nav-button-hover-bg);
+}
+
+/* Individual button styles */
+.smm-prev-button {
+  font-size: 16px;
+}
+
+.smm-next-button {
+  font-size: 16px;
+}
+
+.smm-show-all-button {
+  font-size: 16px;
+}
+
+.smm-toggle-button {
+  font-size: 14px;
+}
