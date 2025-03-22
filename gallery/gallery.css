@@ -8,53 +8,53 @@
 
 :root {
   /* Light mode variables */
-  --background-color: #f9f9fa;
-  --text-color: #333;
+  --background-color: #F9F9FA;
+  --text-color: #333333;
   --header-bg: #eeeeee;
-  --button-bg: #f0f0f4;
-  --button-border: #d7d7db;
-  --button-hover-bg: #e0e0e6;
-  --button-active-bg: #d7d7db;
-  --accent-color: #0060df;
+  --button-bg: #F0F0F4;
+  --button-border: #D7D7DB;
+  --button-hover-bg: #E0E0E6;
+  --button-active-bg: #D7D7DB;
+  --accent-color: #0060DF;
   --accent-hover: #0250bb;
-  --input-border: #d7d7db;
+  --input-border: #D7D7DB;
   --card-bg: white;
   --card-shadow: rgba(0, 0, 0, 0.1);
-  --image-bg: #f0f0f4;
-  --link-color: #0060df;
-  --remove-color: #d70022;
+  --image-bg: #F0F0F4;
+  --link-color: #0060DF;
+  --remove-color: #D70022;
   --footer-bg: #232525;
   --footer-text: #e3e3e3;
   --footer-link-hover: #16ade2;
   --spinner-border: rgba(0, 0, 0, 0.1);
-  --spinner-accent: #0060df;
+  --spinner-accent: #0060DF;
   --empty-text: #737373;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     /* Dark mode variables */
-    --background-color: #2a2a2e;
-    --text-color: #f9f9fa;
+    --background-color: #2A2A2E;
+    --text-color: #F9F9FA;
     --header-bg: #38383d;
-    --button-bg: #42424a;
-    --button-border: #4a4a4f;
-    --button-hover-bg: #4a4a4f;
+    --button-bg: #42424A;
+    --button-border: #4A4A4F;
+    --button-hover-bg: #4A4A4F;
     --button-active-bg: #52525e;
-    --accent-color: #45a1ff;
+    --accent-color: #007AF4;
     --accent-hover: #65c3ff;
-    --input-border: #4a4a4f;
+    --input-border: #4A4A4F;
     --card-bg: #38383d;
     --card-shadow: rgba(0, 0, 0, 0.3);
-    --image-bg: #2a2a2e;
-    --link-color: #45a1ff;
-    --remove-color: #ff4f5e;
+    --image-bg: #2A2A2E;
+    --link-color: #007AF4;
+    --remove-color: #DC143C;
     --footer-bg: #1c1b22;
-    --footer-text: #b1b1b3;
+    --footer-text: #B1B1B3;
     --footer-link-hover: #16ade2;
     --spinner-border: rgba(255, 255, 255, 0.1);
-    --spinner-accent: #45a1ff;
-    --empty-text: #b1b1b3;
+    --spinner-accent: #007AF4;
+    --empty-text: #B1B1B3;
   }
 }
 
@@ -253,6 +253,7 @@ h1 {
   cursor: pointer;
   font-size: 13px;
   padding: 4px 8px;
+  transition: all 0.25s ease-out;
 }
 
 .image-action:hover {

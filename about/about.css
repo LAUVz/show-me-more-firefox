@@ -8,27 +8,27 @@
 
 :root {
   /* Light mode variables */
-  --background-color: #f9f9fa;
-  --text-color: #333;
+  --background-color: #F9F9FA;
+  --text-color: #333333;
   --heading-color: #0c0c0d;
   --card-bg: white;
   --card-shadow: rgba(0, 0, 0, 0.1);
-  --divider-color: #e0e0e6;
-  --accent-color: #0060df;
+  --divider-color: #E0E0E6;
+  --accent-color: #0060DF;
   --secondary-text: #737373;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     /* Dark mode variables */
-    --background-color: #2a2a2e;
-    --text-color: #f9f9fa;
-    --heading-color: #f9f9fa;
+    --background-color: #2A2A2E;
+    --text-color: #F9F9FA;
+    --heading-color: #F9F9FA;
     --card-bg: #38383d;
     --card-shadow: rgba(0, 0, 0, 0.3);
-    --divider-color: #4a4a4f;
-    --accent-color: #45a1ff;
-    --secondary-text: #b1b1b3;
+    --divider-color: #4A4A4F;
+    --accent-color: #007AF4;
+    --secondary-text: #B1B1B3;
   }
 }
 

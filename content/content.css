@@ -3,18 +3,18 @@
 :root {
   --button-shadow: rgba(0, 0, 0, 0.5);
   --nav-bg-color: rgba(240, 240, 244, 0.9);
-  --nav-border-color: #d7d7db;
-  --nav-button-color: #333;
-  --nav-button-hover-bg: #e0e0e6;
+  --nav-border-color: #D7D7DB;
+  --nav-button-color: #333333;
+  --nav-button-hover-bg: #E0E0E6;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --button-shadow: rgba(0, 0, 0, 0.7);
     --nav-bg-color: rgba(42, 42, 46, 0.9);
-    --nav-border-color: #4a4a4f;
-    --nav-button-color: #f9f9fa;
-    --nav-button-hover-bg: #4a4a4f;
+    --nav-border-color: #4A4A4F;
+    --nav-button-color: #F9F9FA;
+    --nav-button-hover-bg: #4A4A4F;
   }
 }
 

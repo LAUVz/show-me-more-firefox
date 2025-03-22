@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
   <style>
     .main-color { fill: #737373; }
-    .accent-color { fill: #0060df; }
+    .accent-color { fill: #0060DF; }
   </style>
-  <rect x="40" y="60" width="160" height="120" rx="8" ry="8" fill="none" stroke="#d7d7db" stroke-width="4"/>
+  <rect x="40" y="60" width="160" height="120" rx="8" ry="8" fill="none" stroke="#D7D7DB" stroke-width="4"/>
   <path class="main-color" d="M70 100 L100 140 L130 120 L170 170" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
   <circle class="accent-color" cx="90" cy="90" r="10"/>
-  <line x1="40" y1="190" x2="200" y2="190" stroke="#d7d7db" stroke-width="4"/>
-  <line x1="70" y1="200" x2="170" y2="200" stroke="#d7d7db" stroke-width="4"/>
+  <line x1="40" y1="190" x2="200" y2="190" stroke="#D7D7DB" stroke-width="4"/>
+  <line x1="70" y1="200" x2="170" y2="200" stroke="#D7D7DB" stroke-width="4"/>
   <g opacity="0.5">
     <line x1="80" y1="60" x2="80" y2="40" stroke="#737373" stroke-width="2"/>
     <line x1="120" y1="60" x2="120" y2="30" stroke="#737373" stroke-width="2"/>

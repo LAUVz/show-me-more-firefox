@@ -160,18 +160,24 @@ class ShowMeMore {
   }
 
   private updateBadge(): void {
-    // Don't display badge text - no image counter needed
-    browser.browserAction.setBadgeText({ text: '' });
+    if (this.recordedImages.length) {
+      browser.browserAction.setBadgeText({ text: this.recordedImages.length.toString() });
+      browser.browserAction.setBadgeBackgroundColor({ color: '#4a90e2' });
+    }
   }
 
   private updateRecordingState(): void {
     browser.browserAction.setIcon({
       path: this.isRecording ? {
         16: 'icons/show-me-more-recording-16.png',
-        32: 'icons/show-me-more-recording-32.png'
+        32: 'icons/show-me-more-recording-32.png',
+        48: 'icons/show-me-more-recording-48.png',
+        96: 'icons/show-me-more-recording-96.png'
       } : {
         16: 'icons/show-me-more-16.png',
-        32: 'icons/show-me-more-32.png'
+        32: 'icons/show-me-more-32.png',
+        48: 'icons/show-me-more-48.png',
+        96: 'icons/show-me-more-96.png'
       }
     });
 
