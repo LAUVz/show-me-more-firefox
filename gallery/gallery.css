@@ -1,15 +1,4 @@
-.load-more-container {
-  text-align: center;
-  margin: 30px 0;
-  padding: 10px;
-}
-
-.load-more-container .button {
-  font-size: 16px;
-  padding: 10px 20px;
-  background-color: var(--accent-color);
-  color: white;
-}/* Show Me More - Gallery Styles */
+/* Show Me More - Gallery Styles */
 
 * {
   box-sizing: border-box;
@@ -81,6 +70,12 @@ body {
   background-color: var(--header-bg);
   padding: 10px 0;
   box-shadow: 0 2px 4px var(--card-shadow);
+  position: sticky;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  z-index: 9999;
+  height: 64px;
 }
 
 .header-content {
@@ -95,6 +90,7 @@ body {
 .logo-container {
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .logo {
@@ -104,7 +100,9 @@ body {
 }
 
 h1 {
-  font-size: 24px;
+  font-size: 20px;
+  line-height: 20px;
+  text-transform: uppercase;
   font-weight: 600;
 }
 
@@ -117,7 +115,8 @@ h1 {
 .button-row {
   display: flex;
   gap: 8px;
-  margin-bottom: 8px;
+  align-items: center;
+  justify-content: center;
 }
 
 .button-row:last-child {
@@ -248,7 +247,8 @@ h1 {
 
 .image-action {
   background: none;
-  border: none;
+  border: 1px solid var(--button-border);
+  border-radius: 3px;
   color: var(--link-color);
   cursor: pointer;
   font-size: 13px;
@@ -256,11 +256,15 @@ h1 {
 }
 
 .image-action:hover {
-  text-decoration: underline;
+  border: 1px solid var(--link-color);
 }
 
 .image-action.remove {
   color: var(--remove-color);
+}
+
+.image-action.remove:hover {
+  border: 1px solid var(--remove-color);
 }
 
 .loading {
@@ -339,6 +343,62 @@ h1 {
   margin-top: 8px;
   font-size: 12px;
   opacity: 0.8;
+}
+
+/* Duplicate detection styles */
+.duplicate-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: var(--accent-color);
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  z-index: 10;
+  box-shadow: 0 2px 4px var(--card-shadow);
+}
+
+.image-item.is-duplicate {
+  border: 2px solid var(--accent-color);
+}
+
+.duplicate-info {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--accent-color);
+}
+
+.filter-btn {
+  margin-left: 10px;
+  font-size: 13px;
+  background: none;
+  border: none;
+  color: var(--accent-color);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.filter-btn:hover {
+  opacity: 0.8;
+}
+
+.load-more-container {
+  text-align: center;
+  margin: 30px 0;
+  padding: 10px;
+}
+
+.load-more-container .button {
+  font-size: 16px;
+  padding: 10px 20px;
+  background-color: var(--accent-color);
+  color: white;
 }
 
 /* Responsive adjustments */

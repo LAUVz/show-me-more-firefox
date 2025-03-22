@@ -1,4 +1,5 @@
 // Show Me More - Gallery Script
+import ImageSimilarity from './image-similarity';
 
 interface RecordedImage {
   url: string;
@@ -26,6 +27,7 @@ class Gallery {
   private createLinkButton: HTMLButtonElement;
   private copyButton: HTMLButtonElement;
   private stopButton: HTMLButtonElement | null = null;
+  private detectDuplicatesButton: HTMLButtonElement;
   private loadMoreButton: HTMLButtonElement;
   private loadMoreContainer: HTMLElement;
   private imagesAdjusted: boolean = false;
@@ -36,6 +38,10 @@ class Gallery {
   private currentParsedURI: ParsedURI | null = null;
   private canContinueCrawlingUp: boolean = true;
   private canContinueCrawlingDown: boolean = true;
+  // Image similarity properties
+  private duplicateGroups: Map<string, string[]> = new Map();
+  private imageHashes: Map<string, string> = new Map();
+  private isDuplicateDetectionEnabled: boolean = false;
 
   constructor() {
     this.mainImageContainer = document.getElementById('image-container') as HTMLElement;
@@ -48,6 +54,7 @@ class Gallery {
     this.createLinkButton = document.getElementById('button-create-link') as HTMLButtonElement;
     this.copyButton = document.getElementById('copy-button') as HTMLButtonElement;
     this.stopButton = document.getElementById('button-stop-crawling') as HTMLButtonElement;
+    this.detectDuplicatesButton = document.getElementById('button-detect-duplicates') as HTMLButtonElement;
     this.loadMoreButton = document.getElementById('load-more-button') as HTMLButtonElement;
     this.loadMoreContainer = document.getElementById('load-more-container') as HTMLElement;
 
@@ -83,6 +90,7 @@ class Gallery {
     this.createLinkButton.addEventListener('click', this.createShareLink.bind(this));
     this.copyButton.addEventListener('click', this.copyShareLink.bind(this));
     this.loadMoreButton.addEventListener('click', this.loadMoreImages.bind(this));
+    this.detectDuplicatesButton.addEventListener('click', this.toggleDuplicateDetection.bind(this));
 
     if (this.stopButton) {
       this.stopButton.addEventListener('click', this.stopCrawling.bind(this));
@@ -675,7 +683,7 @@ class Gallery {
       alert('Failed to create share link. Please try again later.');
     } finally {
       this.createLinkButton.disabled = false;
-      this.createLinkButton.textContent = 'Create Link to Share';
+      this.createLinkButton.textContent = 'Share';
     }
   }
 
@@ -689,6 +697,260 @@ class Gallery {
     setTimeout(() => {
       this.copyButton.textContent = originalText;
     }, 2000);
+  }
+
+  /**
+   * Toggle duplicate detection feature
+   */
+  private async toggleDuplicateDetection(): Promise<void> {
+    if (!this.isDuplicateDetectionEnabled) {
+      // Start detection
+      this.detectDuplicatesButton.disabled = true;
+      this.detectDuplicatesButton.textContent = 'Detecting...';
+
+      // Show loading indicator
+      this.loadingElement.classList.remove('hidden');
+      this.updateLoadingText('Analyzing images for duplicates...');
+
+      // Need to let UI update before starting the heavy work
+      await this.delay(100);
+
+      // Process images
+      await this.detectDuplicates();
+
+      // Hide loading
+      this.loadingElement.classList.add('hidden');
+
+      // Update button
+      this.detectDuplicatesButton.textContent = 'Hide Duplicates';
+      this.detectDuplicatesButton.disabled = false;
+      this.isDuplicateDetectionEnabled = true;
+    } else {
+      // Hide duplicates
+      this.hideDuplicateMarkers();
+      this.detectDuplicatesButton.textContent = 'Detect Duplicates';
+      this.isDuplicateDetectionEnabled = false;
+    }
+  }
+
+  /**
+   * Detect duplicate images in the gallery
+   */
+  private async detectDuplicates(): Promise<void> {
+    try {
+      // Only process if we have images
+      if (this.images.length <= 1) {
+        alert('Need at least two images to detect duplicates.');
+        return;
+      }
+
+      // If we already processed these images, just show the results
+      if (this.duplicateGroups.size > 0) {
+        this.showDuplicateMarkers();
+        return;
+      }
+
+      // Process in chunks to avoid UI freezing
+      const chunkSize = 10;
+      const imageUrls = [...this.images]; // Copy array
+
+      // Generate hashes in chunks
+      for (let i = 0; i < imageUrls.length; i += chunkSize) {
+        const chunk = imageUrls.slice(i, i + chunkSize);
+
+        // Update loading text
+        this.updateLoadingText(`Generating image fingerprints... (${i}/${imageUrls.length})`);
+
+        // Process chunk
+        await Promise.all(chunk.map(async (url) => {
+          try {
+            const hash = await ImageSimilarity.getImageHash(url);
+            if (hash) {
+              this.imageHashes.set(url, hash);
+            }
+          } catch (error) {
+            console.error(`Error generating hash for ${url}:`, error);
+          }
+        }));
+
+        // Small delay to let UI update
+        await this.delay(50);
+      }
+
+      this.updateLoadingText('Comparing images...');
+      await this.delay(50);
+
+      // Then compare to find duplicates
+      const processedUrls = new Set<string>();
+
+      for (const [url1, hash1] of this.imageHashes.entries()) {
+        if (processedUrls.has(url1)) continue;
+
+        const similarUrls: string[] = [url1];
+
+        for (const [url2, hash2] of this.imageHashes.entries()) {
+          if (url1 === url2 || processedUrls.has(url2)) continue;
+
+          const similarity = ImageSimilarity.getSimilarityScore(hash1, hash2);
+          if (similarity >= ImageSimilarity.THRESHOLD) {
+            similarUrls.push(url2);
+            processedUrls.add(url2);
+          }
+        }
+
+        if (similarUrls.length > 1) {
+          this.duplicateGroups.set(url1, similarUrls);
+        }
+
+        processedUrls.add(url1);
+      }
+
+      // Display results
+      this.showDuplicateMarkers();
+
+      // Show summary
+      const totalDuplicates = Array.from(this.duplicateGroups.values())
+        .reduce((sum, group) => sum + group.length - 1, 0);
+
+      if (totalDuplicates > 0) {
+        alert(`Found ${totalDuplicates} duplicate images in ${this.duplicateGroups.size} groups.`);
+      } else {
+        alert('No duplicate images found.');
+      }
+    } catch (error) {
+      console.error('Error detecting duplicates:', error);
+      alert('Error detecting duplicates. See console for details.');
+    }
+  }
+
+  /**
+   * Add duplicate markers to images in the gallery
+   */
+  private showDuplicateMarkers(): void {
+    // First, clear any existing markers
+    this.hideDuplicateMarkers();
+
+    // For each duplicate group
+    let groupCounter = 1;
+    for (const [representative, duplicates] of this.duplicateGroups.entries()) {
+      // Skip if only one image (no duplicates)
+      if (duplicates.length <= 1) continue;
+
+      // Create a unique group identifier
+      const groupId = `group-${groupCounter}`;
+
+      // For each image in the group
+      for (const url of duplicates) {
+        const imageItem = document.querySelector(`.image-item[data-url="${this.escapeSelector(url)}"]`) as HTMLElement;
+        if (!imageItem) continue;
+
+        // Mark as duplicate
+        imageItem.classList.add('is-duplicate');
+        imageItem.dataset.duplicateGroup = groupId;
+
+        // Add badge with group number
+        const badge = document.createElement('div');
+        badge.className = 'duplicate-badge';
+        badge.textContent = groupCounter.toString();
+        badge.title = `This image is part of group #${groupCounter} (${duplicates.length} similar images)`;
+
+        // Add info text
+        const infoText = document.createElement('div');
+        infoText.className = 'duplicate-info';
+        infoText.textContent = `Similar to ${duplicates.length - 1} other image(s)`;
+
+        // Add filter button
+        const filterBtn = document.createElement('button');
+        filterBtn.className = 'filter-btn';
+        filterBtn.textContent = 'Show only this group';
+        filterBtn.dataset.group = groupId;
+        filterBtn.addEventListener('click', this.filterByDuplicateGroup.bind(this));
+
+        infoText.appendChild(filterBtn);
+
+        // Add to image item
+        const imageWrapper = imageItem.querySelector('.image-wrapper');
+        if (imageWrapper) {
+          imageWrapper.appendChild(badge);
+        }
+
+        const imageInfo = imageItem.querySelector('.image-info');
+        if (imageInfo) {
+          imageInfo.appendChild(infoText);
+        }
+      }
+
+      // Increment group counter for next group
+      groupCounter++;
+    }
+  }
+
+  /**
+   * Remove duplicate markers from images
+   */
+  private hideDuplicateMarkers(): void {
+    // Remove all duplicate markers
+    document.querySelectorAll('.duplicate-badge').forEach(badge => badge.remove());
+    document.querySelectorAll('.duplicate-info').forEach(info => info.remove());
+    document.querySelectorAll('.image-item.is-duplicate').forEach(item => {
+      item.classList.remove('is-duplicate');
+      delete (item as HTMLElement).dataset.duplicateGroup;
+    });
+
+    // Reset any filtering
+    document.querySelectorAll('.image-item').forEach(item => {
+      (item as HTMLElement).style.display = 'block';
+    });
+  }
+
+  /**
+   * Filter gallery to show only images in a specific duplicate group
+   */
+  private filterByDuplicateGroup(event: Event): void {
+    const button = event.target as HTMLButtonElement;
+    const groupId = button.dataset.group;
+
+    if (!groupId) return;
+
+    // Toggle filtering
+    const isFiltering = button.textContent === 'Show all images';
+
+    if (isFiltering) {
+      // Show all images
+      document.querySelectorAll('.image-item').forEach(item => {
+        (item as HTMLElement).style.display = 'block';
+      });
+
+      // Update all buttons in this group
+      document.querySelectorAll(`.filter-btn[data-group="${groupId}"]`).forEach(btn => {
+        (btn as HTMLButtonElement).textContent = 'Show only this group';
+      });
+    } else {
+      // Filter to show only this group
+      document.querySelectorAll('.image-item').forEach(item => {
+        if ((item as HTMLElement).dataset.duplicateGroup === groupId) {
+          (item as HTMLElement).style.display = 'block';
+        } else {
+          (item as HTMLElement).style.display = 'none';
+        }
+      });
+
+      // Update all buttons in this group
+      document.querySelectorAll(`.filter-btn[data-group="${groupId}"]`).forEach(btn => {
+        (btn as HTMLButtonElement).textContent = 'Show all images';
+      });
+    }
+  }
+
+  /**
+   * Helper to escape special characters in URL for querySelector
+   */
+  private escapeSelector(selector: string): string {
+    return selector
+      .replace(/'/g, "\\'")
+      .replace(/"/g, '\\"')
+      .replace(/\\/g, '\\\\')
+      .replace(/[\[\]()]/g, '\\$&');
   }
 }
 
