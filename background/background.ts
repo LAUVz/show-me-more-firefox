@@ -105,7 +105,7 @@ class ShowMeMore {
         this.markUserInteracted();
         return Promise.resolve(true);
       case 'createLink':
-        console.log("Received createLink message with", message.urls?.length, "URLs");
+        console.log(`Received createLink message with ${message.urls?.length} URLs`, message);
         return this.createLink(message.urls || []);
       default:
         console.log("Unknown message action:", message.action);
@@ -481,7 +481,10 @@ class ShowMeMore {
         body: formData
       });
 
+      console.log("createLink response:", response);
+
       if (!response.ok) {
+        console.log("Failed to create link:", response);
         console.error('Error creating link: Server returned', response.status);
         return null;
       }

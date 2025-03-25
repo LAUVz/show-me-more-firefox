@@ -661,11 +661,15 @@ class Gallery {
     this.createLinkButton.textContent = 'Creating Link...';
 
     try {
-      console.log("Attempting to create share link for", this.images.length, "images");
+      console.log(`Attempting to create share link for ${this.images.length} images`, this.images);
+
+      const uniqUri = [...new Set(this.images)];
+
+      console.log(`Attempting to create share link for unique ${uniqUri.length} images`, uniqUri);
 
       const shareUrl = await browser.runtime.sendMessage({
         action: 'createLink',
-        urls: this.images
+        urls: uniqUri
       });
 
       console.log("Share URL result:", shareUrl);

@@ -2,6 +2,7 @@
 class ShowMeMoreContent {
   private isRecording: boolean = false;
   private recordButton: HTMLButtonElement | null = null;
+  private recordCounter: HTMLSpanElement | null = null;
 
   constructor() {
     this.init();
@@ -112,11 +113,16 @@ class ShowMeMoreContent {
     this.recordButton.style.position = 'absolute';
     this.recordButton.style.zIndex = '9999';
     this.recordButton.style.width = '46px';
-    this.recordButton.style.height = '27px';
+    this.recordButton.style.height = '46px';
     this.recordButton.style.border = 'none';
     this.recordButton.style.background = 'transparent';
     this.recordButton.style.cursor = 'pointer';
     this.recordButton.style.padding = '0';
+    this.recordButton.style.zIndex = '9999';
+
+    this.recordCounter = document.createElement('span');
+    this.recordButton.className = 'smm-record-button-counter';
+    this.recordButton.appendChild(this.recordCounter);
 
     // Position the button near the image
     const rect = img.getBoundingClientRect();
@@ -126,16 +132,18 @@ class ShowMeMoreContent {
     // Add icon image
     const icon = document.createElement('img');
 
+    icon.src = browser.runtime.getURL('icons/add_recorded_icon.svg');
+
     // Check if dark mode is enabled
-    const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (prefersDarkMode) {
-      icon.src = browser.runtime.getURL('icons/add_recorded_icon_dark.svg');
-    } else {
-      icon.src = browser.runtime.getURL('icons/add_recorded_icon.svg');
-    }
+    // const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // if (prefersDarkMode) {
+    //   icon.src = browser.runtime.getURL('icons/add_recorded_icon_dark.svg');
+    // } else {
+    //   icon.src = browser.runtime.getURL('icons/add_recorded_icon.svg');
+    // }
 
     icon.style.width = '42px';
-    icon.style.height = '24px';
+    icon.style.height = '42px';
     icon.style.border = 'none';
 
     this.recordButton.appendChild(icon);
