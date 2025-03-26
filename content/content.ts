@@ -1,4 +1,6 @@
 // Show Me More - Content Script
+import { MessageActions, sendMessage } from '../shared/messaging';
+
 class ShowMeMoreContent {
   private isRecording: boolean = false;
   private recordButton: HTMLButtonElement | null = null;
@@ -10,7 +12,9 @@ class ShowMeMoreContent {
 
   async init(): Promise<void> {
     // Check if recording is active
-    this.isRecording = await browser.runtime.sendMessage({ action: 'getIsRecording' });
+    this.isRecording = await sendMessage({
+      action: MessageActions.GET_IS_RECORDING
+    });
 
     // Set up message listener
     browser.runtime.onMessage.addListener(this.handleMessage.bind(this));
@@ -28,14 +32,14 @@ class ShowMeMoreContent {
       for (const mutation of mutations) {
         if (mutation.type === 'childList') {
           const nodes = Array.from(mutation.addedNodes);
-      for (const node of nodes) {
-        if (node instanceof HTMLElement) {
-          if (node.tagName === 'IMG' || node.querySelectorAll('img').length > 0) {
-            shouldRefresh = true;
-            break;
+          for (const node of nodes) {
+            if (node instanceof HTMLElement) {
+              if (node.tagName === 'IMG' || node.querySelectorAll('img').length > 0) {
+                shouldRefresh = true;
+                break;
+              }
+            }
           }
-        }
-      }
         }
         if (shouldRefresh) break;
       }
@@ -52,7 +56,7 @@ class ShowMeMoreContent {
   }
 
   private handleMessage(message: any): void {
-    if (message.action === 'recordingStateChanged') {
+    if (message.action === MessageActions.RECORDING_STATE_CHANGED) {
       this.isRecording = message.isRecording;
     }
   }
@@ -66,16 +70,16 @@ class ShowMeMoreContent {
 
     // Custom keyboard shortcuts (Alt+Left/Right for navigation)
     if (event.altKey && event.key === 'ArrowLeft') {
-      browser.runtime.sendMessage({ action: 'markUserInteracted' });
-      browser.runtime.sendMessage({ action: 'navigatePrev' });
+      sendMessage({ action: MessageActions.MARK_USER_INTERACTED });
+      sendMessage({ action: MessageActions.NAVIGATE_PREV });
       event.preventDefault();
     } else if (event.altKey && event.key === 'ArrowRight') {
-      browser.runtime.sendMessage({ action: 'markUserInteracted' });
-      browser.runtime.sendMessage({ action: 'navigateNext' });
+      sendMessage({ action: MessageActions.MARK_USER_INTERACTED });
+      sendMessage({ action: MessageActions.NAVIGATE_NEXT });
       event.preventDefault();
     } else if (event.altKey && event.key === 'a') {
-      browser.runtime.sendMessage({ action: 'markUserInteracted' });
-      browser.runtime.sendMessage({ action: 'showAll' });
+      sendMessage({ action: MessageActions.MARK_USER_INTERACTED });
+      sendMessage({ action: MessageActions.SHOW_ALL });
       event.preventDefault();
     }
   }
@@ -131,17 +135,7 @@ class ShowMeMoreContent {
 
     // Add icon image
     const icon = document.createElement('img');
-
     icon.src = browser.runtime.getURL('icons/add_recorded_icon.svg');
-
-    // Check if dark mode is enabled
-    // const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    // if (prefersDarkMode) {
-    //   icon.src = browser.runtime.getURL('icons/add_recorded_icon_dark.svg');
-    // } else {
-    //   icon.src = browser.runtime.getURL('icons/add_recorded_icon.svg');
-    // }
-
     icon.style.width = '42px';
     icon.style.height = '42px';
     icon.style.border = 'none';
@@ -154,11 +148,11 @@ class ShowMeMoreContent {
       e.preventDefault();
 
       // Mark user interaction
-      browser.runtime.sendMessage({ action: 'markUserInteracted' });
+      sendMessage({ action: MessageActions.MARK_USER_INTERACTED });
 
       // Record the image
-      browser.runtime.sendMessage({
-        action: 'recordImage',
+      sendMessage({
+        action: MessageActions.RECORD_IMAGE,
         url: img.src
       });
     });

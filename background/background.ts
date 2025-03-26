@@ -1,14 +1,8 @@
 // Show Me More - Background Script
-interface RecordedImage {
-  url: string;
-  timestamp: number;
-}
-
-interface ParsedURI {
-  first: string;
-  num: string | false;
-  last: string;
-}
+import { RecordedImage, ParsedURI, CrawlDirection, ChangeDirection } from '../shared/types';
+import { UrlParser } from '../shared/url-parser';
+import { ImageUtils } from '../shared/image-utils';
+import { MessageActions } from '../shared/messaging';
 
 class ShowMeMore {
   private recordedImages: RecordedImage[] = [];
@@ -57,54 +51,61 @@ class ShowMeMore {
 
   private handleMessage(message: any, sender: browser.runtime.MessageSender): Promise<any> {
     // Track user interaction for most actions
-    if (['recordImage', 'toggleRecording', 'resetRecorded', 'removeImage',
-         'navigateNext', 'navigatePrev', 'showAll'].includes(message.action)) {
+    if ([
+      MessageActions.RECORD_IMAGE,
+      MessageActions.TOGGLE_RECORDING,
+      MessageActions.RESET_RECORDED,
+      MessageActions.REMOVE_IMAGE,
+      MessageActions.NAVIGATE_NEXT,
+      MessageActions.NAVIGATE_PREV,
+      MessageActions.SHOW_ALL
+    ].includes(message.action)) {
       this.markUserInteracted();
     }
 
     console.log("Received message:", message);
 
     switch(message.action) {
-      case 'recordImage':
+      case MessageActions.RECORD_IMAGE:
         return Promise.resolve(this.addToRecorded(message.url));
-      case 'getRecordedImages':
+      case MessageActions.GET_RECORDED_IMAGES:
         return Promise.resolve(this.recordedImages);
-      case 'getIsRecording':
+      case MessageActions.GET_IS_RECORDING:
         return Promise.resolve(this.isRecording);
-      case 'toggleRecording':
+      case MessageActions.TOGGLE_RECORDING:
         this.toggleRecording();
         return Promise.resolve(this.isRecording);
-      case 'resetRecorded':
+      case MessageActions.RESET_RECORDED:
         this.resetRecorded();
         return Promise.resolve(true);
-      case 'removeImage':
+      case MessageActions.REMOVE_IMAGE:
         this.removeFromRecordedItems(message.index);
         return Promise.resolve(true);
-      case 'parseURI':
-        return Promise.resolve(this.parseURI(message.uri));
-      case 'changeURINumber':
-        return Promise.resolve(this.changeURINumber(message.oURI, message.direction, message.forceZero));
-      case 'navigateNext':
+      case MessageActions.PARSE_URI:
+        return Promise.resolve(UrlParser.parseURI(message.uri));
+      case MessageActions.CHANGE_URI_NUMBER:
+        return Promise.resolve(UrlParser.changeURINumber(message.oURI, message.direction, message.forceZero));
+      case MessageActions.NAVIGATE_NEXT:
         // If a specific tabId is provided in the message, use that instead
         const nextTabId = message.tabId || sender.tab?.id;
         return this.navigateNext(nextTabId);
-      case 'navigatePrev':
+      case MessageActions.NAVIGATE_PREV:
         // If a specific tabId is provided in the message, use that instead
         const prevTabId = message.tabId || sender.tab?.id;
         return this.navigatePrev(prevTabId);
-      case 'showAll':
+      case MessageActions.SHOW_ALL:
         // If a specific tabId is provided in the message, use that instead
         const showAllTabId = message.tabId || sender.tab?.id;
         // Check if a direction is specified
         const direction = message.direction || 'both';
         console.log("Show All message received with direction:", direction, "tab:", showAllTabId);
         return this.showAll(showAllTabId, direction);
-      case 'getHasUserInteracted':
+      case MessageActions.GET_HAS_USER_INTERACTED:
         return Promise.resolve(this.hasUserInteracted);
-      case 'markUserInteracted':
+      case MessageActions.MARK_USER_INTERACTED:
         this.markUserInteracted();
         return Promise.resolve(true);
-      case 'createLink':
+      case MessageActions.CREATE_LINK:
         console.log(`Received createLink message with ${message.urls?.length} URLs`, message);
         return this.createLink(message.urls || []);
       default:
@@ -225,7 +226,7 @@ class ShowMeMore {
       tabs.forEach(tab => {
         if (tab.id) {
           browser.tabs.sendMessage(tab.id, {
-            action: 'recordingStateChanged',
+            action: MessageActions.RECORDING_STATE_CHANGED,
             isRecording: this.isRecording
           }).catch(() => {
             // Ignore errors for tabs that don't have our content script
@@ -249,125 +250,6 @@ class ShowMeMore {
     this.updateBadge();
   }
 
-  parseURI(uri: string): ParsedURI {
-    // Log the URI for debugging
-    console.log("Parsing URI:", uri);
-
-    // Handle URLs with query parameters or anchors
-    const cleanUri = uri.split('?')[0].split('#')[0];
-
-    const lastSlash = cleanUri.lastIndexOf('/');
-    if (lastSlash === -1) {
-      return { first: '', num: false, last: cleanUri };
-    }
-
-    const baseURI = cleanUri.substring(0, lastSlash);
-    const fileName = cleanUri.substring(lastSlash + 1);
-
-    console.log("Base URI:", baseURI, "Filename:", fileName);
-    return this.parseFile(baseURI, fileName);
-  }
-
-  private parseFile(baseURI: string, fileName: string): ParsedURI {
-    console.log("Parsing file:", fileName);
-
-    const oURI: ParsedURI = {
-      first: baseURI,
-      num: false,
-      last: fileName
-    };
-
-    // First check if filename is just a number
-    if (/^\d+$/.test(fileName)) {
-      oURI.first += '/';
-      oURI.num = fileName;
-      oURI.last = '';
-      console.log("Found numeric filename:", oURI);
-      return oURI;
-    }
-
-    // Check for file extension
-    const reExt = /(.*)\.([^\.]+)$/i;
-    if (reExt.test(fileName)) {
-      const extension = fileName.replace(reExt, "$2");
-      const file = fileName.replace(reExt, "$1");
-
-      // Find numbers in the filename
-      const reNumber = /\d+/g;
-      const matches = file.match(reNumber);
-
-      if (matches && matches.length > 0) {
-        // Use the last number in the filename
-        const lastNumber = matches[matches.length - 1];
-        const posNumber = file.lastIndexOf(lastNumber);
-
-        const startFile = file.substring(0, posNumber);
-        const endFile = file.substring(posNumber + lastNumber.length) + '.' + extension;
-
-        oURI.first += '/' + startFile;
-        oURI.num = lastNumber;
-        oURI.last = endFile;
-
-        console.log("Found numbered file:", oURI);
-        return oURI;
-      }
-    }
-
-    // Couldn't find a number in the filename
-    oURI.first += '/';
-    oURI.last = fileName;
-    console.log("No number found in filename:", oURI);
-
-    return oURI;
-  }
-
-  private numToLength(num: string | false, length: number): string {
-    if (num === false) return '';
-
-    let numStr = num.toString();
-    while (numStr.length < length) {
-      numStr = '0' + numStr;
-    }
-    return numStr;
-  }
-
-  changeURINumber(oURI: ParsedURI, direction: 'up' | 'down', forceZero?: boolean): string | false {
-    if (!oURI || !oURI.num) return false;
-
-    const numLength = oURI.num.length;
-    const hasZero = /^0/.test(oURI.num);
-    let num = parseInt(oURI.num, 10);
-
-    if (direction === 'up') {
-      num = num + 1;
-      oURI.num = hasZero ? this.numToLength(num.toString(), numLength) : num.toString();
-    } else if (direction === 'down') {
-      num = num - 1;
-      if (num < 0) return false;
-
-      if (hasZero || forceZero) {
-        oURI.num = this.numToLength(num.toString(), numLength);
-      } else {
-        oURI.num = num.toString();
-      }
-    } else {
-      oURI.num = this.numToLength(num.toString(), numLength);
-    }
-
-    return oURI.first + oURI.num + oURI.last;
-  }
-
-  private checkTransition10To9(oURICopy: ParsedURI, nextURI: string | false): string | false {
-    if (oURICopy.num && (parseInt(oURICopy.num, 10) % 10) === 0) {
-      if (nextURI) {
-        // This function checks if the URL exists by making a HEAD request
-        // Simplified for this implementation
-        return nextURI;
-      }
-    }
-    return nextURI;
-  }
-
   private async navigatePrev(tabId?: number): Promise<boolean> {
     if (!tabId) return Promise.resolve(false);
 
@@ -375,11 +257,11 @@ class ShowMeMore {
       const tab = await browser.tabs.get(tabId);
       if (!tab.url) return Promise.resolve(false);
 
-      const oURI = this.parseURI(tab.url);
+      const oURI = UrlParser.parseURI(tab.url);
       const oURICopy = { ...oURI };
 
-      let nextURI = this.changeURINumber(oURI, 'down');
-      nextURI = this.checkTransition10To9(oURICopy, nextURI);
+      let nextURI = UrlParser.changeURINumber(oURI, 'down');
+      nextURI = UrlParser.checkTransition10To9(oURICopy, nextURI);
 
       if (nextURI) {
         console.log("Navigating to previous:", nextURI);
@@ -401,8 +283,8 @@ class ShowMeMore {
       const tab = await browser.tabs.get(tabId);
       if (!tab.url) return Promise.resolve(false);
 
-      const oURI = this.parseURI(tab.url);
-      let nextURI = this.changeURINumber(oURI, 'up');
+      const oURI = UrlParser.parseURI(tab.url);
+      let nextURI = UrlParser.changeURINumber(oURI, 'up');
 
       if (nextURI) {
         console.log("Navigating to next:", nextURI);
@@ -417,22 +299,7 @@ class ShowMeMore {
     }
   }
 
-  private async checkURIStatus(url: string, checkContentType: boolean = true): Promise<boolean> {
-    try {
-      const response = await fetch(url, { method: 'HEAD' });
-
-      if (!response.ok) return false;
-
-      if (!checkContentType) return true;
-
-      const contentType = response.headers.get('Content-Type');
-      return contentType !== null && /.*image.*/i.test(contentType);
-    } catch (e) {
-      return false;
-    }
-  }
-
-  private async showAll(tabId?: number, direction: 'both' | 'prev' | 'next' = 'both'): Promise<boolean> {
+  private async showAll(tabId?: number, direction: CrawlDirection = 'both'): Promise<boolean> {
     if (!tabId) return Promise.resolve(false);
 
     try {
@@ -442,7 +309,7 @@ class ShowMeMore {
       console.log("ShowAll for URL:", tab.url, "Direction:", direction);
 
       // Check if current URL has a number sequence we can iterate
-      const parsedURI = this.parseURI(tab.url);
+      const parsedURI = UrlParser.parseURI(tab.url);
       if (!parsedURI || !parsedURI.num) {
         this.showNotification('This URL does not contain a number sequence to show all images.');
         return Promise.resolve(false);

@@ -1,0 +1,303 @@
+// Show Me More - Gallery UI Manager
+import { ImageUtils } from '../shared/image-utils';
+
+/**
+ * Manages the gallery UI components
+ */
+export class UIManager {
+  // UI Elements
+  private mainImageContainer: HTMLElement;
+  private loadingElement: HTMLElement;
+  private loadingText: HTMLElement;
+  private emptyStateElement: HTMLElement;
+  private shareContainer: HTMLElement;
+  private shareLinkInput: HTMLInputElement;
+  private adjustSizeButton: HTMLButtonElement;
+  private createLinkButton: HTMLButtonElement;
+  private copyButton: HTMLButtonElement;
+  private stopButton: HTMLButtonElement | null;
+  private detectDuplicatesButton: HTMLButtonElement;
+  private loadMoreButton: HTMLButtonElement;
+  private loadMoreContainer: HTMLElement;
+
+  // UI State
+  private imagesAdjusted: boolean = false;
+
+  /**
+   * Initialize the UI Manager
+   */
+  constructor() {
+    // Get UI elements
+    this.mainImageContainer = document.getElementById('image-container') as HTMLElement;
+    this.loadingElement = document.getElementById('loading') as HTMLElement;
+    this.loadingText = document.getElementById('loading-text') as HTMLElement;
+    this.emptyStateElement = document.getElementById('empty-state') as HTMLElement;
+    this.shareContainer = document.getElementById('share-container') as HTMLElement;
+    this.shareLinkInput = document.getElementById('share-link') as HTMLInputElement;
+    this.adjustSizeButton = document.getElementById('button-adjust-size') as HTMLButtonElement;
+    this.createLinkButton = document.getElementById('button-create-link') as HTMLButtonElement;
+    this.copyButton = document.getElementById('copy-button') as HTMLButtonElement;
+    this.stopButton = document.getElementById('button-stop-crawling') as HTMLButtonElement;
+    this.detectDuplicatesButton = document.getElementById('button-detect-duplicates') as HTMLButtonElement;
+    this.loadMoreButton = document.getElementById('load-more-button') as HTMLButtonElement;
+    this.loadMoreContainer = document.getElementById('load-more-container') as HTMLElement;
+
+    // Set up UI event listeners
+    this.setupEventListeners();
+  }
+
+  /**
+   * Set up event listeners for UI elements
+   */
+  private setupEventListeners(): void {
+    this.adjustSizeButton.addEventListener('click', this.toggleImageSize.bind(this));
+    this.copyButton.addEventListener('click', this.copyShareLink.bind(this));
+  }
+
+  /**
+   * Show the loading indicator with a message
+   * @param message Message to display
+   */
+  showLoading(message: string = 'Loading images...'): void {
+    this.updateLoadingText(message);
+    this.loadingElement.classList.remove('hidden');
+    // Keep the image container visible during loading, just hide empty state
+    this.emptyStateElement.classList.add('hidden');
+    // Make sure image container is visible
+    this.mainImageContainer.classList.remove('hidden');
+  }
+
+  /**
+   * Hide the loading indicator
+   */
+  hideLoading(): void {
+    this.loadingElement.classList.add('hidden');
+  }
+
+  /**
+   * Show the empty state message
+   */
+  showEmptyState(): void {
+    this.loadingElement.classList.add('hidden');
+    this.mainImageContainer.classList.add('hidden');
+    this.emptyStateElement.classList.remove('hidden');
+    this.loadMoreContainer.classList.add('hidden');
+    this.createLinkButton.disabled = true;
+  }
+
+  /**
+   * Show the image container and hide empty state
+   */
+  showImageContainer(): void {
+    this.emptyStateElement.classList.add('hidden');
+    this.mainImageContainer.classList.remove('hidden');
+  }
+
+  /**
+   * Clear the image container
+   */
+  clearImageContainer(): void {
+    this.mainImageContainer.innerHTML = '';
+  }
+
+  /**
+   * Update the loading text
+   * @param text Text to display
+   */
+  updateLoadingText(text: string): void {
+    if (this.loadingText) {
+      this.loadingText.textContent = text;
+    }
+  }
+
+  /**
+   * Toggle the size of images between contain and cover
+   */
+  toggleImageSize(): void {
+    this.imagesAdjusted = !this.imagesAdjusted;
+
+    const images = document.querySelectorAll('.gallery-image') as NodeListOf<HTMLImageElement>;
+
+    images.forEach(img => {
+      if (this.imagesAdjusted) {
+        img.style.objectFit = 'cover';
+        this.adjustSizeButton.textContent = 'Show Original Sizes';
+      } else {
+        img.style.objectFit = 'contain';
+        this.adjustSizeButton.textContent = 'Adjust Images Size';
+      }
+    });
+  }
+
+  /**
+   * Toggle the load more button visibility
+   * @param show Whether to show the button
+   */
+  toggleLoadMoreButton(show: boolean): void {
+    if (show) {
+      this.loadMoreContainer.classList.remove('hidden');
+    } else {
+      this.loadMoreContainer.classList.add('hidden');
+    }
+  }
+
+  /**
+   * Create an image element for display
+   * @param imageUrl URL of the image
+   * @param prepend Whether to prepend to container
+   * @param removeCallback Callback for when image is removed
+   */
+  createImageElement(
+    imageUrl: string,
+    prepend: boolean = false,
+    removeCallback?: (url: string) => void
+  ): HTMLElement {
+    // Create the image element
+    const imageItem = document.createElement('div');
+    imageItem.className = 'image-item';
+    imageItem.dataset.url = imageUrl;
+
+    const imageWrapper = document.createElement('div');
+    imageWrapper.className = 'image-wrapper';
+
+    const img = document.createElement('img');
+    img.src = imageUrl;
+    img.alt = 'Image';
+    img.className = 'gallery-image';
+
+    // Handle loading error
+    img.onerror = () => {
+      img.src = '../icons/broken-image.svg';
+      img.alt = 'Failed to load image';
+    };
+
+    const imageInfo = document.createElement('div');
+    imageInfo.className = 'image-info';
+
+    const linkContainer = document.createElement('div');
+
+    const link = document.createElement('a');
+    link.href = imageUrl;
+    link.className = 'image-url';
+    link.textContent = ImageUtils.truncateUrl(imageUrl);
+    link.title = imageUrl;
+    link.target = '_blank';
+
+    linkContainer.appendChild(link);
+
+    const imageActions = document.createElement('div');
+    imageActions.className = 'image-actions';
+
+    const openButton = document.createElement('button');
+    openButton.textContent = 'Open in New Tab';
+    openButton.className = 'image-action';
+    openButton.addEventListener('click', () => {
+      browser.tabs.create({ url: imageUrl });
+    });
+
+    imageActions.appendChild(openButton);
+
+    // Add remove button if callback provided
+    if (removeCallback) {
+      const removeButton = document.createElement('button');
+      removeButton.textContent = 'Remove';
+      removeButton.className = 'image-action remove';
+      removeButton.addEventListener('click', () => {
+        removeCallback(imageUrl);
+        imageItem.remove();
+      });
+
+      imageActions.appendChild(removeButton);
+    }
+
+    imageWrapper.appendChild(img);
+    imageItem.appendChild(imageWrapper);
+    imageInfo.appendChild(linkContainer);
+    imageInfo.appendChild(imageActions);
+    imageItem.appendChild(imageInfo);
+
+    // Add to the container (at beginning or end)
+    if (prepend) {
+      this.mainImageContainer.insertBefore(imageItem, this.mainImageContainer.firstChild);
+    } else {
+      this.mainImageContainer.appendChild(imageItem);
+    }
+
+    return imageItem;
+  }
+
+  /**
+   * Sets the stopped state for crawling
+   * @param stopped Whether crawling is stopped
+   */
+  setStoppedState(stopped: boolean): void {
+    if (this.stopButton) {
+      this.stopButton.textContent = 'Crawling Stopped';
+      this.stopButton.disabled = stopped;
+    }
+  }
+
+  /**
+   * Set up the share functionality
+   * @param callback Function to call when share button is clicked
+   */
+  setupShareButton(callback: () => void): void {
+    this.createLinkButton.addEventListener('click', callback);
+  }
+
+  /**
+   * Update the share link input
+   * @param url URL to share
+   */
+  updateShareLink(url: string): void {
+    this.shareLinkInput.value = url;
+    this.shareContainer.classList.remove('hidden');
+    this.shareLinkInput.select();
+  }
+
+  /**
+   * Set the state of the create link button
+   * @param isDisabled Whether the button should be disabled
+   * @param text Text to display on the button
+   */
+  setCreateLinkButtonState(isDisabled: boolean, text: string): void {
+    this.createLinkButton.disabled = isDisabled;
+    this.createLinkButton.textContent = text;
+  }
+
+  /**
+   * Copy the share link to clipboard
+   */
+  copyShareLink(): void {
+    this.shareLinkInput.select();
+    document.execCommand('copy');
+
+    // Visual feedback
+    const originalText = this.copyButton.textContent;
+    this.copyButton.textContent = 'Copied!';
+    setTimeout(() => {
+      this.copyButton.textContent = originalText;
+    }, 2000);
+  }
+
+  /**
+   * Get the load more button
+   */
+  getLoadMoreButton(): HTMLButtonElement {
+    return this.loadMoreButton;
+  }
+
+  /**
+   * Get the stop button
+   */
+  getStopButton(): HTMLButtonElement | null {
+    return this.stopButton;
+  }
+
+  /**
+   * Get the duplicate detection button
+   */
+  getDuplicateDetectionButton(): HTMLButtonElement {
+    return this.detectDuplicatesButton;
+  }
+}

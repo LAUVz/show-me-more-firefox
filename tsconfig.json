@@ -13,6 +13,7 @@
     "background/*.ts",
     "content/*.ts",
     "popup/*.ts",
-    "gallery/*.ts"
+    "gallery/*.ts",
+    "shared/*.ts"
   ]
 }
