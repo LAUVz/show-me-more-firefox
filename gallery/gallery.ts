@@ -341,7 +341,13 @@ class Gallery {
     // Get form values
     const shareTitle = (document.getElementById('share-title') as HTMLInputElement).value || 'My Image Collection';
     const shareDescription = (document.getElementById('share-description') as HTMLTextAreaElement).value || '';
-    const shareTags = (document.getElementById('share-tags') as HTMLInputElement).value || '';
+    const shareTagsString = (document.getElementById('share-tags') as HTMLInputElement).value || '';
+    const isPrivate = (document.getElementById('share-private') as HTMLInputElement).checked;
+
+    // Convert comma-separated tags string to array
+    const shareTags = shareTagsString.split(',')
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
 
     // Update UI state for link creation
     const shareDialog = document.getElementById('share-dialog') as HTMLElement;
@@ -360,13 +366,17 @@ class Gallery {
       let shareUrl: string | null = null;
 
       if (this.mode === 'recorded' && this.recordedManager) {
-        shareUrl = await this.recordedManager.createShareLink();
+        shareUrl = await this.recordedManager.createShareLink(shareTitle, shareDescription, shareTags, isPrivate);
       } else if (this.mode === 'sequence') {
         // Create link directly for sequence mode
         const uniqueUrls = [...new Set(images)];
         shareUrl = await sendMessage({
           action: MessageActions.CREATE_LINK,
-          urls: uniqueUrls
+          urls: uniqueUrls,
+          title: shareTitle,
+          description: shareDescription,
+          tags: shareTags,
+          isPrivate: isPrivate
         });
       }
 
@@ -416,9 +426,6 @@ class Gallery {
           // Also update the main share link display outside the dialog
           this.uiManager.updateShareLink(shareUrl as string);
         });
-
-        // Also update the main share link display outside the dialog
-        this.uiManager.updateShareLink(shareUrl);
       } else {
         console.error("Failed to create share link: No URL returned");
         alert('Failed to create share link. Please try again later.');

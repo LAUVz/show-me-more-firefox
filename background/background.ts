@@ -107,7 +107,13 @@ class ShowMeMore {
         return Promise.resolve(true);
       case MessageActions.CREATE_LINK:
         console.log(`Received createLink message with ${message.urls?.length} URLs`, message);
-        return this.createLink(message.urls || []);
+        return this.createLink(
+          message.urls || [],
+          message.title,
+          message.description,
+          message.tags,
+          message.isPrivate
+        );
       default:
         console.log("Unknown message action:", message.action);
         return Promise.resolve(null);
@@ -329,14 +335,32 @@ class ShowMeMore {
     }
   }
 
-  async createLink(urls: string[]): Promise<string | null> {
+  async createLink(
+    urls: string[],
+    title?: string,
+    description?: string,
+    tags?: string[],
+    isPrivate?: boolean
+  ): Promise<string | null> {
     if (urls.length === 0) return Promise.resolve(null);
 
     try {
-      console.log("Creating link for", urls.length, "URLs. First URL:", urls[0]);
+      console.log(`Creating link for ${urls.length} URLs. First URL:`, urls[0]);
 
       // Create FormData as expected by the server
       const formData = new FormData();
+
+      // Add metadata
+      if (title) formData.append('title', title);
+      if (description) formData.append('description', description);
+      if (tags && tags.length > 0) {
+        tags.forEach((tag, index) => {
+          formData.append(`tags[${index}]`, tag);
+        });
+      }
+      if (isPrivate !== undefined) formData.append('isPrivate', isPrivate.toString());
+
+      // Add image URLs
       urls.forEach((url, index) => {
         formData.append(`images[${index}]`, url);
       });

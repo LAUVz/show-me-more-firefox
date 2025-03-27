@@ -25,14 +25,12 @@
           <div class="images-count">
             Total: <span id="images-found-count">0</span>
           </div>
-          <button id="button-create-link" class="button primary">Share</button>
+          <button id="button-create-link" class="button primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save-icon lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg>
+          </button>
           <button id="button-adjust-size" class="button">Adjust Images Size</button>
           <button id="button-detect-duplicates" class="button">Detect Duplicates</button>
           <button id="button-stop-crawling" class="button danger">Stop Crawling</button>
-        </div>
-        <div id="share-container" class="share-container hidden">
-          <input type="text" id="share-link" class="share-link" readonly>
-          <button id="copy-button" class="button">Copy</button>
         </div>
       </div>
     </div>
@@ -42,6 +40,7 @@
         <p id="loading-text">Loading images...</p>
       </div>
       <div id="load-more-container" class="load-more-container hidden">
+        <p id="load-more-text">Crawling limit of 100 images reached!</p>
         <button id="load-more-button" class="button">Try to Crawl 100 More Images</button>
       </div>
     </div>
@@ -66,18 +65,23 @@
       <div class="share-dialog-body">
         <div class="share-form">
           <div class="form-group">
-            <label for="share-title">Title</label>
+            <label for="share-title">Title (Optional)</label>
             <input type="text" id="share-title" placeholder="My Image Collection">
           </div>
 
           <div class="form-group">
-            <label for="share-description">Description</label>
+            <label for="share-description">Description (Optional)</label>
             <textarea id="share-description" placeholder="A brief description of these images"></textarea>
           </div>
 
           <div class="form-group">
-            <label for="share-tags">Tags (comma separated)</label>
+            <label for="share-tags">Tags (Optional)</label>
             <input type="text" id="share-tags" placeholder="images, collection, gallery">
+          </div>
+
+          <div class="form-group form-checkbox">
+            <input type="checkbox" id="share-private" name="share-private">
+            <label for="share-private">Make This Collection Private</label>
           </div>
         </div>
         <div class="share-otput hidden">
@@ -97,7 +101,7 @@
         </div>
         <div class="share-otput-controls hidden">
           <button id="close-share-button" class="button">Close</button>
-          <button id="download-share-button" class="button">Download ZIP</button>
+          <!-- <button id="download-share-button" class="button">Download ZIP</button> -->
           <button id="vist-share-button" class="button primary">Go To Gallery</button>
         </div>
       </div>

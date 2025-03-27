@@ -102,8 +102,18 @@ export class RecordedManager {
 
   /**
    * Create a share link for the recorded images
+   * @param title Title for the image collection
+   * @param description Description for the image collection
+   * @param tags Array of tags for the image collection
+   * @param isPrivate Whether the collection should be private
+   * @returns Promise resolving to the share URL or null
    */
-  async createShareLink(): Promise<string | null> {
+  async createShareLink(
+    title: string = '',
+    description: string = '',
+    tags: string[] = [],
+    isPrivate: boolean = false
+  ): Promise<string | null> {
     try {
       if (this.urls.length === 0) return null;
 
@@ -115,7 +125,11 @@ export class RecordedManager {
 
       const shareUrl = await sendMessage<string | null>({
         action: MessageActions.CREATE_LINK,
-        urls: uniqueUrls
+        urls: uniqueUrls,
+        title,
+        description,
+        tags,
+        isPrivate
       });
 
       console.log("Share URL result:", shareUrl);

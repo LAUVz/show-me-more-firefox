@@ -10,11 +10,8 @@ export class UIManager {
   private loadingElement: HTMLElement;
   private loadingText: HTMLElement;
   private emptyStateElement: HTMLElement;
-  private shareContainer: HTMLElement;
-  private shareLinkInput: HTMLInputElement;
   private adjustSizeButton: HTMLButtonElement;
   private createLinkButton: HTMLButtonElement;
-  private copyButton: HTMLButtonElement;
   private stopButton: HTMLButtonElement | null;
   private detectDuplicatesButton: HTMLButtonElement;
   private loadMoreButton: HTMLButtonElement;
@@ -36,11 +33,8 @@ export class UIManager {
     this.loadingElement = document.getElementById('loading') as HTMLElement;
     this.loadingText = document.getElementById('loading-text') as HTMLElement;
     this.emptyStateElement = document.getElementById('empty-state') as HTMLElement;
-    this.shareContainer = document.getElementById('share-container') as HTMLElement;
-    this.shareLinkInput = document.getElementById('share-link') as HTMLInputElement;
     this.adjustSizeButton = document.getElementById('button-adjust-size') as HTMLButtonElement;
     this.createLinkButton = document.getElementById('button-create-link') as HTMLButtonElement;
-    this.copyButton = document.getElementById('copy-button') as HTMLButtonElement;
     this.stopButton = document.getElementById('button-stop-crawling') as HTMLButtonElement;
     this.detectDuplicatesButton = document.getElementById('button-detect-duplicates') as HTMLButtonElement;
     this.loadMoreButton = document.getElementById('load-more-button') as HTMLButtonElement;
@@ -60,7 +54,6 @@ export class UIManager {
    */
   private setupEventListeners(): void {
     this.adjustSizeButton.addEventListener('click', this.toggleImageSize.bind(this));
-    this.copyButton.addEventListener('click', this.copyShareLink.bind(this));
   }
 
   /**
@@ -299,13 +292,15 @@ export class UIManager {
   }
 
   /**
-   * Update the share link input
+   * Update the share link in the dialog
    * @param url URL to share
    */
   updateShareLink(url: string): void {
-    this.shareLinkInput.value = url;
-    this.shareContainer.classList.remove('hidden');
-    this.shareLinkInput.select();
+    // Update the share link in dialog
+    const dialogShareLink = document.querySelector('.share-otput #share-link') as HTMLInputElement;
+    if (dialogShareLink) {
+      dialogShareLink.value = url;
+    }
   }
 
   /**
@@ -316,21 +311,6 @@ export class UIManager {
   setCreateLinkButtonState(isDisabled: boolean, text: string): void {
     this.createLinkButton.disabled = isDisabled;
     this.createLinkButton.textContent = text;
-  }
-
-  /**
-   * Copy the share link to clipboard
-   */
-  copyShareLink(): void {
-    this.shareLinkInput.select();
-    document.execCommand('copy');
-
-    // Visual feedback
-    const originalText = this.copyButton.textContent;
-    this.copyButton.textContent = 'Copied!';
-    setTimeout(() => {
-      this.copyButton.textContent = originalText;
-    }, 2000);
   }
 
   /**
@@ -360,6 +340,7 @@ export class UIManager {
     (document.getElementById('share-title') as HTMLInputElement).value = '';
     (document.getElementById('share-description') as HTMLTextAreaElement).value = '';
     (document.getElementById('share-tags') as HTMLInputElement).value = '';
+    (document.getElementById('share-private') as HTMLInputElement).checked = false;
 
     // Reset button states
     const confirmButton = document.getElementById('confirm-share-button') as HTMLButtonElement;

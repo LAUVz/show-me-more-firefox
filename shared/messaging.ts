@@ -96,6 +96,10 @@ export interface RemoveImageMessage extends BaseMessage {
 export interface CreateLinkMessage extends BaseMessage {
   action: typeof MessageActions.CREATE_LINK;
   urls: string[];
+  title?: string;
+  description?: string;
+  tags?: string[];
+  isPrivate?: boolean;
 }
 
 /**
