@@ -195,17 +195,6 @@ export class UIManager {
     const imageInfo = document.createElement('div');
     imageInfo.className = 'image-info';
 
-    const linkContainer = document.createElement('div');
-
-    const link = document.createElement('a');
-    link.href = imageUrl;
-    link.className = 'image-url';
-    link.textContent = ImageUtils.truncateUrl(imageUrl);
-    link.title = imageUrl;
-    link.target = '_blank';
-
-    linkContainer.appendChild(link);
-
     const imageActions = document.createElement('div');
     imageActions.className = 'image-actions';
 
@@ -237,7 +226,6 @@ export class UIManager {
 
     imageWrapper.appendChild(img);
     imageItem.appendChild(imageWrapper);
-    imageInfo.appendChild(linkContainer);
     imageInfo.appendChild(imageActions);
     imageItem.appendChild(imageInfo);
 

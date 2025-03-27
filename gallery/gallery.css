@@ -237,8 +237,13 @@ h1 {
 
 .image-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 20px;
+}
+
+.image-container.full-width-images {
+  display: flex;
+  flex-direction: column;
 }
 
 .image-item {
@@ -258,6 +263,10 @@ h1 {
   position: relative;
   padding-top: 75%; /* 4:3 aspect ratio */
   overflow: hidden;
+}
+
+.image-container.full-width-images .image-wrapper {
+  padding: auto;
 }
 
 .image-wrapper img {
@@ -288,7 +297,6 @@ h1 {
 .image-actions {
   display: flex;
   justify-content: space-between;
-  margin-top: 8px;
 }
 
 .image-action {
@@ -437,10 +445,11 @@ h1 {
   opacity: 0.8;
 }
 
-.load-more-container {
+.load-more-container #load-more-text {
+  font-size: 16px;
   text-align: center;
-  margin: 30px 0;
-  padding: 10px;
+  color: var(--text-color);
+  margin-bottom: 10px;
 }
 
 .load-more-container .button {
