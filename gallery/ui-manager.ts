@@ -271,10 +271,31 @@ export class UIManager {
 
   /**
    * Set up the share functionality
-   * @param callback Function to call when share button is clicked
+   * @param callback Function to call when confirm share button is clicked
    */
   setupShareButton(callback: () => void): void {
-    this.createLinkButton.addEventListener('click', callback);
+    // Get share dialog elements
+    const shareDialog = document.getElementById('share-dialog') as HTMLElement;
+    const closeDialogButton = document.getElementById('close-dialog-button') as HTMLButtonElement;
+    const cancelShareButton = document.getElementById('cancel-share-button') as HTMLButtonElement;
+    const confirmShareButton = document.getElementById('confirm-share-button') as HTMLButtonElement;
+
+    // Share button opens the dialog
+    this.createLinkButton.addEventListener('click', () => {
+      shareDialog.classList.remove('hidden');
+    });
+
+    // Close and cancel buttons hide the dialog
+    closeDialogButton.addEventListener('click', () => {
+      shareDialog.classList.add('hidden');
+    });
+
+    cancelShareButton.addEventListener('click', () => {
+      shareDialog.classList.add('hidden');
+    });
+
+    // Confirm button triggers the create link action
+    confirmShareButton.addEventListener('click', callback);
   }
 
   /**
@@ -310,6 +331,40 @@ export class UIManager {
     setTimeout(() => {
       this.copyButton.textContent = originalText;
     }, 2000);
+  }
+
+  /**
+   * Get the share dialog element
+   */
+  getShareDialog(): HTMLElement {
+    return document.getElementById('share-dialog') as HTMLElement;
+  }
+
+  /**
+   * Reset the share dialog to its initial state
+   */
+  resetShareDialog(): void {
+    const shareDialog = this.getShareDialog();
+    const shareForm = shareDialog.querySelector('.share-form') as HTMLElement;
+    const shareOutput = shareDialog.querySelector('.share-otput') as HTMLElement;
+    const shareFormControls = shareDialog.querySelector('.share-form-controls') as HTMLElement;
+    const shareOutputControls = shareDialog.querySelector('.share-otput-controls') as HTMLElement;
+
+    // Reset visibility
+    shareForm.classList.remove('hidden');
+    shareOutput.classList.add('hidden');
+    shareFormControls.classList.remove('hidden');
+    shareOutputControls.classList.add('hidden');
+
+    // Reset form fields
+    (document.getElementById('share-title') as HTMLInputElement).value = '';
+    (document.getElementById('share-description') as HTMLTextAreaElement).value = '';
+    (document.getElementById('share-tags') as HTMLInputElement).value = '';
+
+    // Reset button states
+    const confirmButton = document.getElementById('confirm-share-button') as HTMLButtonElement;
+    confirmButton.textContent = 'Create Link';
+    confirmButton.disabled = false;
   }
 
   /**

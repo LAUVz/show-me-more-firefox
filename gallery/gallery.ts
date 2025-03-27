@@ -76,6 +76,45 @@ class Gallery {
 
     // Set up load more button
     this.uiManager.getLoadMoreButton().addEventListener('click', this.loadMoreImages.bind(this));
+
+    // Set up download button
+    const downloadButton = document.getElementById('download-share-button') as HTMLButtonElement;
+    if (downloadButton) {
+      downloadButton.addEventListener('click', this.downloadImages.bind(this));
+    }
+  }
+
+  /**
+   * Download all images as a zip file
+   */
+  private async downloadImages(): Promise<void> {
+    // Get images based on mode
+    const images = this.mode === 'sequence'
+      ? this.sequenceManager?.getImages() || []
+      : this.recordedManager?.getImageUrls() || [];
+
+    if (images.length === 0) return;
+
+    // Create a message to notify user that download will start in browser
+    alert('Your browser will start downloading images shortly. This may take a moment depending on the number of images.');
+
+    // Create a list of image URLs for download
+    const downloadLinks = images.map(url => {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = url.split('/').pop() || 'image.jpg';
+      return link;
+    });
+
+    // Download images one by one with a small delay to avoid browser issues
+    for (let i = 0; i < downloadLinks.length; i++) {
+      const link = downloadLinks[i];
+      setTimeout(() => {
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }, i * 500); // 500ms delay between downloads
+    }
   }
 
   /**
@@ -289,7 +328,7 @@ class Gallery {
   }
 
   /**
-   * Create a share link for images
+   * Create a share link for images with metadata from the form
    */
   private async createShareLink(): Promise<void> {
     // Get images based on mode
@@ -299,8 +338,22 @@ class Gallery {
 
     if (images.length === 0) return;
 
+    // Get form values
+    const shareTitle = (document.getElementById('share-title') as HTMLInputElement).value || 'My Image Collection';
+    const shareDescription = (document.getElementById('share-description') as HTMLTextAreaElement).value || '';
+    const shareTags = (document.getElementById('share-tags') as HTMLInputElement).value || '';
+
     // Update UI state for link creation
-    this.uiManager.setCreateLinkButtonState(true, 'Creating Link...');
+    const shareDialog = document.getElementById('share-dialog') as HTMLElement;
+    const shareForm = shareDialog.querySelector('.share-form') as HTMLElement;
+    const shareOutput = shareDialog.querySelector('.share-otput') as HTMLElement;
+    const shareFormControls = shareDialog.querySelector('.share-form-controls') as HTMLElement;
+    const shareOutputControls = shareDialog.querySelector('.share-otput-controls') as HTMLElement;
+
+    // Update button state
+    const confirmButton = document.getElementById('confirm-share-button') as HTMLButtonElement;
+    confirmButton.textContent = 'Creating Link...';
+    confirmButton.disabled = true;
 
     try {
       // Use the appropriate manager to create the link
@@ -318,17 +371,69 @@ class Gallery {
       }
 
       if (shareUrl) {
+        // Show success state in dialog
+        shareForm.classList.add('hidden');
+        shareOutput.classList.remove('hidden');
+        shareFormControls.classList.add('hidden');
+        shareOutputControls.classList.remove('hidden');
+
+        // Update share link in dialog
+        const dialogShareLink = shareOutput.querySelector('#share-link') as HTMLInputElement;
+        dialogShareLink.value = shareUrl;
+
+        // Set up copy button in dialog
+        const copyLinkButton = document.getElementById('copy-link-button') as HTMLButtonElement;
+        copyLinkButton.addEventListener('click', () => {
+          dialogShareLink.select();
+          document.execCommand('copy');
+          copyLinkButton.textContent = 'Copied!';
+          setTimeout(() => {
+            copyLinkButton.textContent = 'Copy';
+          }, 2000);
+        });
+
+        // Set up visit button
+        const visitShareButton = document.getElementById('vist-share-button') as HTMLButtonElement;
+        visitShareButton.addEventListener('click', () => {
+          browser.tabs.create({ url: shareUrl as string });
+        });
+
+        // Set up close button
+        const closeShareButton = document.getElementById('close-share-button') as HTMLButtonElement;
+        closeShareButton.addEventListener('click', () => {
+          // Reset dialog and hide it
+          shareDialog.classList.add('hidden');
+          shareForm.classList.remove('hidden');
+          shareOutput.classList.add('hidden');
+          shareFormControls.classList.remove('hidden');
+          shareOutputControls.classList.add('hidden');
+
+          // Reset form
+          (document.getElementById('share-title') as HTMLInputElement).value = '';
+          (document.getElementById('share-description') as HTMLTextAreaElement).value = '';
+          (document.getElementById('share-tags') as HTMLInputElement).value = '';
+
+          // Also update the main share link display outside the dialog
+          this.uiManager.updateShareLink(shareUrl as string);
+        });
+
+        // Also update the main share link display outside the dialog
         this.uiManager.updateShareLink(shareUrl);
       } else {
         console.error("Failed to create share link: No URL returned");
         alert('Failed to create share link. Please try again later.');
+
+        // Reset dialog state
+        confirmButton.textContent = 'Create Link';
+        confirmButton.disabled = false;
       }
     } catch (error) {
       console.error('Error creating share link:', error);
       alert('Failed to create share link. Please try again later.');
-    } finally {
-      // Reset UI state after link creation
-      this.uiManager.setCreateLinkButtonState(false, 'Share');
+
+      // Reset dialog state
+      confirmButton.textContent = 'Create Link';
+      confirmButton.disabled = false;
     }
   }
 }
