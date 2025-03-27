@@ -149,6 +149,11 @@ class Gallery {
             this.uiManager.showEmptyState();
           } else {
             this.uiManager.showImageContainer();
+
+            // Update the total image count
+            if (this.sequenceManager) {
+              this.uiManager.updateImagesCount(this.sequenceManager.getImages().length);
+            }
           }
         }
       }
@@ -180,6 +185,11 @@ class Gallery {
       onImagesLoaded: () => {
         this.uiManager.hideLoading();
         this.uiManager.showImageContainer();
+
+        // Update the total image count for recorded images
+        if (this.recordedManager) {
+          this.uiManager.updateImagesCount(this.recordedManager.getImageUrls().length);
+        }
       },
       onError: () => {
         this.uiManager.showEmptyState();
@@ -199,8 +209,12 @@ class Gallery {
       this.uiManager.setStoppedState(true);
       this.uiManager.toggleLoadMoreButton(false);
 
+      // Update the image count after stopping
+      const imageCount = this.sequenceManager.getImages().length;
+      this.uiManager.updateImagesCount(imageCount);
+
       // Show empty state if no images
-      if (this.sequenceManager.getImages().length === 0) {
+      if (imageCount === 0) {
         this.uiManager.showEmptyState();
       }
     }
@@ -219,6 +233,9 @@ class Gallery {
 
       // Load more images
       await this.sequenceManager.loadMoreImages();
+
+      // Update the total image count
+      this.uiManager.updateImagesCount(this.sequenceManager.getImages().length);
     }
   }
 

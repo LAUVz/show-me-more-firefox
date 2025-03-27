@@ -21,6 +21,9 @@ export class UIManager {
   private loadMoreContainer: HTMLElement;
   private imagesFoundCount: HTMLSpanElement;
 
+  // Track the actual image count
+  private imageCount: number = 0;
+
   // UI State
   private imagesAdjusted: boolean = false;
 
@@ -44,6 +47,10 @@ export class UIManager {
     this.loadMoreContainer = document.getElementById('load-more-container') as HTMLElement;
     this.imagesFoundCount = document.getElementById('images-found-count') as HTMLSpanElement;
 
+    // Initialize the image count to zero
+    this.imageCount = 0;
+    this.updateImagesCount();
+
     // Set up UI event listeners
     this.setupEventListeners();
   }
@@ -54,6 +61,19 @@ export class UIManager {
   private setupEventListeners(): void {
     this.adjustSizeButton.addEventListener('click', this.toggleImageSize.bind(this));
     this.copyButton.addEventListener('click', this.copyShareLink.bind(this));
+  }
+
+  /**
+   * Update the images count display
+   * @param count Optional count to set (if not provided, uses internal count)
+   */
+  updateImagesCount(count?: number): void {
+    if (count !== undefined) {
+      this.imageCount = count;
+    }
+    if (this.imagesFoundCount) {
+      this.imagesFoundCount.textContent = this.imageCount.toString();
+    }
   }
 
   /**
@@ -100,6 +120,8 @@ export class UIManager {
    */
   clearImageContainer(): void {
     this.mainImageContainer.innerHTML = '';
+    this.imageCount = 0;
+    this.updateImagesCount();
   }
 
   /**
@@ -154,6 +176,10 @@ export class UIManager {
     prepend: boolean = false,
     removeCallback?: (url: string) => void
   ): HTMLElement {
+    // Increment the image count
+    this.imageCount++;
+    this.updateImagesCount();
+
     // Create the image element
     const imageItem = document.createElement('div');
     imageItem.className = 'image-item';
@@ -207,6 +233,10 @@ export class UIManager {
       removeButton.addEventListener('click', () => {
         removeCallback(imageUrl);
         imageItem.remove();
+
+        // Decrement the image count
+        this.imageCount = Math.max(0, this.imageCount - 1);
+        this.updateImagesCount();
       });
 
       imageActions.appendChild(removeButton);

@@ -232,7 +232,7 @@ h1 {
   max-width: 1200px;
   margin: 20px auto;
   padding: 0 20px;
-  height: calc(100vh - 90px - 64px - 40px);
+  min-height: calc(100vh - 90px - 64px - 40px);
 }
 
 .image-container {
@@ -320,7 +320,7 @@ h1 {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.75);
   border-radius: 3px;
 }
 
