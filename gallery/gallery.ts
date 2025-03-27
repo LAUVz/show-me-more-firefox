@@ -55,6 +55,24 @@ class Gallery {
   }
 
   /**
+   * Convert a string to title case
+   * @param text Text to convert to title case
+   * @returns Text in title case
+   */
+  private toTitleCase(text: string): string {
+    if (!text) return text;
+
+    return text
+      .toLowerCase()
+      .split(' ')
+      .map(word => {
+        if (word.length === 0) return word;
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      })
+      .join(' ');
+  }
+
+  /**
    * Set up event listeners for UI interactions
    */
   private setupEventListeners(): void {
@@ -65,15 +83,6 @@ class Gallery {
     // Set up share button
     this.uiManager.setupShareButton(this.createShareLink.bind(this));
 
-    // Set up stop button if in sequence mode
-    const stopButton = this.uiManager.getStopButton();
-    if (stopButton) {
-      stopButton.addEventListener('click', this.stopCrawling.bind(this));
-
-      // Only show stop button in sequence mode
-      stopButton.style.display = this.mode === 'sequence' ? 'block' : 'none';
-    }
-
     // Set up load more button
     this.uiManager.getLoadMoreButton().addEventListener('click', this.loadMoreImages.bind(this));
 
@@ -81,6 +90,25 @@ class Gallery {
     const downloadButton = document.getElementById('download-share-button') as HTMLButtonElement;
     if (downloadButton) {
       downloadButton.addEventListener('click', this.downloadImages.bind(this));
+    }
+
+    // Set up title case formatting for share title and tags
+    const shareTitleInput = document.getElementById('share-title') as HTMLInputElement;
+    if (shareTitleInput) {
+      shareTitleInput.addEventListener('blur', () => {
+        shareTitleInput.value = this.toTitleCase(shareTitleInput.value);
+      });
+    }
+
+    const shareTagsInput = document.getElementById('share-tags') as HTMLInputElement;
+    if (shareTagsInput) {
+      shareTagsInput.addEventListener('blur', () => {
+        // Format each tag to title case, but keep the comma separation
+        shareTagsInput.value = shareTagsInput.value
+          .split(',')
+          .map(tag => this.toTitleCase(tag.trim()))
+          .join(', ');
+      });
     }
   }
 
@@ -240,26 +268,6 @@ class Gallery {
   }
 
   /**
-   * Stop crawling images in sequence mode
-   */
-  private stopCrawling(): void {
-    if (this.sequenceManager) {
-      this.sequenceManager.stopCrawling();
-      this.uiManager.setStoppedState(true);
-      this.uiManager.toggleLoadMoreButton(false);
-
-      // Update the image count after stopping
-      const imageCount = this.sequenceManager.getImages().length;
-      this.uiManager.updateImagesCount(imageCount);
-
-      // Show empty state if no images
-      if (imageCount === 0) {
-        this.uiManager.showEmptyState();
-      }
-    }
-  }
-
-  /**
    * Load more images in sequence mode
    */
   private async loadMoreImages(): Promise<void> {
@@ -339,10 +347,27 @@ class Gallery {
     if (images.length === 0) return;
 
     // Get form values
-    const shareTitle = (document.getElementById('share-title') as HTMLInputElement).value || 'My Image Collection';
-    const shareDescription = (document.getElementById('share-description') as HTMLTextAreaElement).value || '';
-    const shareTagsString = (document.getElementById('share-tags') as HTMLInputElement).value || '';
-    const isPrivate = (document.getElementById('share-private') as HTMLInputElement).checked;
+    const shareTitleInput = document.getElementById('share-title') as HTMLInputElement;
+    const shareDescriptionInput = document.getElementById('share-description') as HTMLTextAreaElement;
+    const shareTagsInput = document.getElementById('share-tags') as HTMLInputElement;
+    const isPrivateInput = document.getElementById('share-private') as HTMLInputElement;
+
+    // Apply title case formatting before getting values
+    if (shareTitleInput) {
+      shareTitleInput.value = this.toTitleCase(shareTitleInput.value);
+    }
+
+    if (shareTagsInput) {
+      shareTagsInput.value = shareTagsInput.value
+        .split(',')
+        .map(tag => this.toTitleCase(tag.trim()))
+        .join(', ');
+    }
+
+    const shareTitle = shareTitleInput.value || 'My Image Collection';
+    const shareDescription = shareDescriptionInput.value || '';
+    const shareTagsString = shareTagsInput.value || '';
+    const isPrivate = isPrivateInput.checked;
 
     // Convert comma-separated tags string to array
     const shareTags = shareTagsString.split(',')
@@ -419,9 +444,9 @@ class Gallery {
           shareOutputControls.classList.add('hidden');
 
           // Reset form
-          (document.getElementById('share-title') as HTMLInputElement).value = '';
-          (document.getElementById('share-description') as HTMLTextAreaElement).value = '';
-          (document.getElementById('share-tags') as HTMLInputElement).value = '';
+          shareTitleInput.value = '';
+          shareDescriptionInput.value = '';
+          shareTagsInput.value = '';
 
           // Also update the main share link display outside the dialog
           this.uiManager.updateShareLink(shareUrl as string);

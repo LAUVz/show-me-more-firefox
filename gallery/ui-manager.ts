@@ -10,9 +10,7 @@ export class UIManager {
   private loadingElement: HTMLElement;
   private loadingText: HTMLElement;
   private emptyStateElement: HTMLElement;
-  private adjustSizeButton: HTMLButtonElement;
   private createLinkButton: HTMLButtonElement;
-  private stopButton: HTMLButtonElement | null;
   private detectDuplicatesButton: HTMLButtonElement;
   private loadMoreButton: HTMLButtonElement;
   private loadMoreContainer: HTMLElement;
@@ -20,9 +18,6 @@ export class UIManager {
 
   // Track the actual image count
   private imageCount: number = 0;
-
-  // UI State
-  private imagesAdjusted: boolean = false;
 
   /**
    * Initialize the UI Manager
@@ -33,9 +28,7 @@ export class UIManager {
     this.loadingElement = document.getElementById('loading') as HTMLElement;
     this.loadingText = document.getElementById('loading-text') as HTMLElement;
     this.emptyStateElement = document.getElementById('empty-state') as HTMLElement;
-    this.adjustSizeButton = document.getElementById('button-adjust-size') as HTMLButtonElement;
     this.createLinkButton = document.getElementById('button-create-link') as HTMLButtonElement;
-    this.stopButton = document.getElementById('button-stop-crawling') as HTMLButtonElement;
     this.detectDuplicatesButton = document.getElementById('button-detect-duplicates') as HTMLButtonElement;
     this.loadMoreButton = document.getElementById('load-more-button') as HTMLButtonElement;
     this.loadMoreContainer = document.getElementById('load-more-container') as HTMLElement;
@@ -53,7 +46,39 @@ export class UIManager {
    * Set up event listeners for UI elements
    */
   private setupEventListeners(): void {
-    this.adjustSizeButton.addEventListener('click', this.toggleImageSize.bind(this));
+    // Set up view mode toggle (full-width vs grid)
+    const fullSizeButton = document.getElementById('button-full-size') as HTMLButtonElement;
+    const gridButton = document.getElementById('button-grid') as HTMLButtonElement;
+
+    if (fullSizeButton) {
+      fullSizeButton.addEventListener('click', this.toggleFullWidthView.bind(this, true));
+    }
+
+    if (gridButton) {
+      gridButton.addEventListener('click', this.toggleFullWidthView.bind(this, false));
+    }
+  }
+
+  /**
+   * Toggle between full width and grid view
+   * @param isFullWidth Whether to switch to full width view (true) or grid view (false)
+   */
+  private toggleFullWidthView(isFullWidth: boolean): void {
+    const imageContainer = document.getElementById('image-container') as HTMLElement;
+    const fullSizeButton = document.getElementById('button-full-size') as HTMLButtonElement;
+    const gridButton = document.getElementById('button-grid') as HTMLButtonElement;
+
+    if (isFullWidth) {
+      // Switch to full width view
+      imageContainer.classList.add('full-width-images');
+      fullSizeButton.classList.add('hidden');
+      gridButton.classList.remove('hidden');
+    } else {
+      // Switch to grid view
+      imageContainer.classList.remove('full-width-images');
+      fullSizeButton.classList.remove('hidden');
+      gridButton.classList.add('hidden');
+    }
   }
 
   /**
@@ -125,25 +150,6 @@ export class UIManager {
     if (this.loadingText) {
       this.loadingText.textContent = text;
     }
-  }
-
-  /**
-   * Toggle the size of images between contain and cover
-   */
-  toggleImageSize(): void {
-    this.imagesAdjusted = !this.imagesAdjusted;
-
-    const images = document.querySelectorAll('.gallery-image') as NodeListOf<HTMLImageElement>;
-
-    images.forEach(img => {
-      if (this.imagesAdjusted) {
-        img.style.objectFit = 'cover';
-        this.adjustSizeButton.textContent = 'Show Original Sizes';
-      } else {
-        img.style.objectFit = 'contain';
-        this.adjustSizeButton.textContent = 'Adjust Images Size';
-      }
-    });
   }
 
   /**
@@ -240,17 +246,6 @@ export class UIManager {
   }
 
   /**
-   * Sets the stopped state for crawling
-   * @param stopped Whether crawling is stopped
-   */
-  setStoppedState(stopped: boolean): void {
-    if (this.stopButton) {
-      this.stopButton.textContent = 'Crawling Stopped';
-      this.stopButton.disabled = stopped;
-    }
-  }
-
-  /**
    * Set up the share functionality
    * @param callback Function to call when confirm share button is clicked
    */
@@ -341,13 +336,6 @@ export class UIManager {
    */
   getLoadMoreButton(): HTMLButtonElement {
     return this.loadMoreButton;
-  }
-
-  /**
-   * Get the stop button
-   */
-  getStopButton(): HTMLButtonElement | null {
-    return this.stopButton;
   }
 
   /**
