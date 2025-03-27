@@ -22,6 +22,9 @@
       </div>
       <div class="actions">
         <div class="button-row">
+          <div class="images-count">
+            Found: <span id="images-found-count">0</span>
+          </div>
           <button id="button-create-link" class="button primary">Share</button>
           <button id="button-adjust-size" class="button">Adjust Images Size</button>
           <button id="button-detect-duplicates" class="button">Detect Duplicates</button>
@@ -33,23 +36,73 @@
         </div>
       </div>
     </div>
+    <div class="header-output">
+      <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p id="loading-text">Loading images...</p>
+      </div>
+      <div id="load-more-container" class="load-more-container hidden">
+        <button id="load-more-button" class="button">Try to Crawl 100 More Images</button>
+      </div>
+    </div>
   </header>
 
   <main id="gallery-container" class="gallery-container">
-    <div id="loading" class="loading">
-      <div class="spinner"></div>
-      <p id="loading-text">Loading images...</p>
-    </div>
     <div id="empty-state" class="empty-state hidden">
       <img src="../icons/empty-state.svg" alt="No images found" class="empty-icon">
       <h2>No Images Found</h2>
       <p>Either you haven't recorded any images yet, or we couldn't find any related images in the sequence.</p>
     </div>
     <div id="image-container" class="image-container hidden"></div>
-    <div id="load-more-container" class="load-more-container hidden">
-      <button id="load-more-button" class="button">Load 100 More Images</button>
-    </div>
   </main>
+
+  <!-- Share Dialog -->
+  <div id="share-dialog" class="share-dialog hidden">
+    <div class="share-dialog-content">
+      <div class="share-dialog-header">
+        <h2>Share Collection</h2>
+        <button id="close-dialog-button" class="close-button">&times;</button>
+      </div>
+      <div class="share-dialog-body">
+        <div class="share-form">
+          <div class="form-group">
+            <label for="share-title">Title</label>
+            <input type="text" id="share-title" placeholder="My Image Collection">
+          </div>
+
+          <div class="form-group">
+            <label for="share-description">Description</label>
+            <textarea id="share-description" placeholder="A brief description of these images"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="share-tags">Tags (comma separated)</label>
+            <input type="text" id="share-tags" placeholder="images, collection, gallery">
+          </div>
+        </div>
+        <div class="share-otput hidden">
+          <div class="form-group">
+            <label for="share-link">Link</label>
+            <div class="share-link-container">
+              <input type="text" id="share-link" placeholder="Link to My Image Collection">
+              <button id="copy-link-button" class="button primary">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="share-dialog-footer">
+        <div class="share-form-controls">
+          <button id="cancel-share-button" class="button">Cancel</button>
+          <button id="confirm-share-button" class="button primary">Create Link</button>
+        </div>
+        <div class="share-otput-controls hidden">
+          <button id="close-share-button" class="button">Close</button>
+          <button id="download-share-button" class="button">Download ZIP</button>
+          <button id="vist-share-button" class="button primary">Go To Gallery</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <footer class="footer">
     <p>&copy; 2025 | <a href="http://showmemore.eu/" target="_blank">Show Me More</a></p>

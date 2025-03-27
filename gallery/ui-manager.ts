@@ -19,6 +19,7 @@ export class UIManager {
   private detectDuplicatesButton: HTMLButtonElement;
   private loadMoreButton: HTMLButtonElement;
   private loadMoreContainer: HTMLElement;
+  private imagesFoundCount: HTMLSpanElement;
 
   // UI State
   private imagesAdjusted: boolean = false;
@@ -41,6 +42,7 @@ export class UIManager {
     this.detectDuplicatesButton = document.getElementById('button-detect-duplicates') as HTMLButtonElement;
     this.loadMoreButton = document.getElementById('load-more-button') as HTMLButtonElement;
     this.loadMoreContainer = document.getElementById('load-more-container') as HTMLElement;
+    this.imagesFoundCount = document.getElementById('images-found-count') as HTMLSpanElement;
 
     // Set up UI event listeners
     this.setupEventListeners();
