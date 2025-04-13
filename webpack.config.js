@@ -34,6 +34,7 @@ module.exports = {
         { from: 'popup/popup.css', to: 'popup' },
         { from: 'gallery/gallery.html', to: 'gallery' },
         { from: 'gallery/gallery.css', to: 'gallery' },
+        { from: 'gallery/toast.css', to: 'gallery' },
         { from: 'about/about.html', to: 'about' },
         { from: 'about/about.css', to: 'about' },
         { from: 'content/content.css', to: 'content' }

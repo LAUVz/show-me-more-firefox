@@ -7,7 +7,7 @@ import { MessageActions } from '../shared/messaging';
 class ShowMeMore {
   private recordedImages: RecordedImage[] = [];
   private isRecording: boolean = false;
-  private readonly createURI: string = 'http://localhost:3000/api/create';
+  private readonly createURI: string = 'https://showmemore.eu/api/create';
   private readonly maxRecursion: number = 255;
   private hasUserInteracted: boolean = false;
 

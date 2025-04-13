@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Show Me More",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Navigate through image sequences, record and share image collections",
   "author": "LAUVz",
   "homepage_url": "http://showmemore.eu/",

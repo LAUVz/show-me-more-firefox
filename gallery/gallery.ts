@@ -5,6 +5,7 @@ import { UIManager } from './ui-manager';
 import { SequenceManager } from './sequence-manager';
 import { RecordedManager } from './recorded-manager';
 import { DuplicateDetector } from './duplicate-detector';
+import { Toast } from './toast';
 
 /**
  * Main Gallery controller that coordinates all gallery components
@@ -124,7 +125,7 @@ class Gallery {
     if (images.length === 0) return;
 
     // Create a message to notify user that download will start in browser
-    alert('Your browser will start downloading images shortly. This may take a moment depending on the number of images.');
+    Toast.info('Your browser will start downloading images shortly. This may take a moment depending on the number of images.');
 
     // Create a list of image URLs for download
     const downloadLinks = images.map(url => {
@@ -323,9 +324,9 @@ class Gallery {
       if (totalDuplicates > 0) {
         // Access the duplicateGroups safely without directly accessing private property
         const groupCount = this.duplicateDetector.getDuplicateGroupCount();
-        alert(`Found ${totalDuplicates} duplicate images in ${groupCount} groups.`);
+        Toast.success(`Found ${totalDuplicates} duplicate images in ${groupCount} groups.`);
       } else {
-        alert('No duplicate images found.');
+        Toast.info('No duplicate images found.');
       }
     } else {
       // Hide duplicates
@@ -422,6 +423,7 @@ class Gallery {
           dialogShareLink.select();
           document.execCommand('copy');
           copyLinkButton.textContent = 'Copied!';
+          Toast.success('Link copied to clipboard!');
           setTimeout(() => {
             copyLinkButton.textContent = 'Copy';
           }, 2000);
@@ -453,7 +455,7 @@ class Gallery {
         });
       } else {
         console.error("Failed to create share link: No URL returned");
-        alert('Failed to create share link. Please try again later.');
+        Toast.error('Failed to create share link. Please try again later.');
 
         // Reset dialog state
         confirmButton.textContent = 'Create Link';
@@ -461,7 +463,7 @@ class Gallery {
       }
     } catch (error) {
       console.error('Error creating share link:', error);
-      alert('Failed to create share link. Please try again later.');
+      Toast.error('Failed to create share link. Please try again later.');
 
       // Reset dialog state
       confirmButton.textContent = 'Create Link';
