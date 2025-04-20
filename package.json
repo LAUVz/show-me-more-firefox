@@ -1,6 +1,6 @@
 {
   "name": "show-me-more",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Navigate through image sequences, record and share image collections",
   "private": true,
   "scripts": {

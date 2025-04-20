@@ -72,7 +72,7 @@ This will create a `.zip` file in the `packages` directory that can be submitted
 
 ### Installation from Package
 
-1. Open Firefox and navigate to `about:addons`
+1. Open Firefox and navigate to `about:addons `
 2. Click the gear icon and select "Install Add-on From File..."
 3. Select the `.zip` file from the `packages` directory
 
