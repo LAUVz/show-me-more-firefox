@@ -308,10 +308,16 @@ export class SequenceManager {
           this.currentParsedURI = { ...currentParsedURI };
         } else {
           countTries++;
-          if (countTries > 1) {
+          if (countTries >= 10) {
             this.canContinueCrawlingDown = false;
             break;
           }
+
+          // Skip to next index - update current URI to continue from the failed one
+          currentParsedURI = await sendMessage<ParsedURI>({
+            action: MessageActions.PARSE_URI,
+            uri: prevURI
+          });
         }
       } else {
         this.canContinueCrawlingDown = false;
@@ -365,10 +371,16 @@ export class SequenceManager {
           this.currentParsedURI = { ...currentParsedURI };
         } else {
           countTries++;
-          if (countTries > 1) {
+          if (countTries >= 10) {
             this.canContinueCrawlingUp = false;
             break;
           }
+
+          // Skip to next index - update current URI to continue from the failed one
+          currentParsedURI = await sendMessage<ParsedURI>({
+            action: MessageActions.PARSE_URI,
+            uri: nextURI
+          });
         }
       } else {
         this.canContinueCrawlingUp = false;
