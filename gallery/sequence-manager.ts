@@ -15,6 +15,8 @@ export class SequenceManager {
   private canContinueCrawlingUp: boolean = true;
   private canContinueCrawlingDown: boolean = true;
   private currentParsedURI: ParsedURI | null = null;
+  private currentUpwardURI: ParsedURI | null = null;
+  private currentDownwardURI: ParsedURI | null = null;
   private imageLimit: number = 100;
 
   // UI update callbacks
@@ -139,6 +141,8 @@ export class SequenceManager {
 
       // Save the parsed URI for potential "load more" operations
       this.currentParsedURI = { ...parsedURI };
+      this.currentUpwardURI = { ...parsedURI };
+      this.currentDownwardURI = { ...parsedURI };
 
       // Determine crawl direction
       let shouldCrawlDown = this.crawlDirection === 'both' || this.crawlDirection === 'prev';
@@ -195,7 +199,7 @@ export class SequenceManager {
    * Load more images in the sequence
    */
   async loadMoreImages(): Promise<void> {
-    if (!this.sourceUrl || !this.currentParsedURI) return;
+    if (!this.sourceUrl) return;
 
     this.onLoadingUpdate('Loading more images...');
 
@@ -209,8 +213,8 @@ export class SequenceManager {
       let upLimit = Math.floor(moreImageLimit / 2);
 
       let foundDownImages = 0;
-      if (this.canContinueCrawlingDown) {
-        foundDownImages = await this.findPreviousImages(this.currentParsedURI, downLimit);
+      if (this.canContinueCrawlingDown && this.currentDownwardURI) {
+        foundDownImages = await this.findPreviousImages(this.currentDownwardURI, downLimit);
         console.log(`Found ${foundDownImages} more previous images out of ${downLimit} limit`);
       }
 
@@ -221,27 +225,27 @@ export class SequenceManager {
         console.log(`Reallocating ${unusedAllocation} unused previous image slots to next search (new limit: ${upLimit})`);
       }
 
-      if (this.canContinueCrawlingUp) {
-        const foundUpImages = await this.findNextImages(this.currentParsedURI, upLimit);
+      if (this.canContinueCrawlingUp && this.currentUpwardURI) {
+        const foundUpImages = await this.findNextImages(this.currentUpwardURI, upLimit);
         console.log(`Found ${foundUpImages} more next images out of ${upLimit} limit`);
       }
-    } else if (this.crawlDirection === 'prev' && this.canContinueCrawlingDown) {
-      const foundImages = await this.findPreviousImages(this.currentParsedURI, moreImageLimit);
+    } else if (this.crawlDirection === 'prev' && this.canContinueCrawlingDown && this.currentDownwardURI) {
+      const foundImages = await this.findPreviousImages(this.currentDownwardURI, moreImageLimit);
       console.log(`Found ${foundImages} more previous images out of ${moreImageLimit} limit`);
 
       // If we found nothing, try looking for next images instead
-      if (foundImages === 0 && this.canContinueCrawlingUp) {
+      if (foundImages === 0 && this.canContinueCrawlingUp && this.currentUpwardURI) {
         console.log("No more previous images found, searching for next images instead");
-        await this.findNextImages(this.currentParsedURI, moreImageLimit);
+        await this.findNextImages(this.currentUpwardURI, moreImageLimit);
       }
-    } else if (this.crawlDirection === 'next' && this.canContinueCrawlingUp) {
-      const foundImages = await this.findNextImages(this.currentParsedURI, moreImageLimit);
+    } else if (this.crawlDirection === 'next' && this.canContinueCrawlingUp && this.currentUpwardURI) {
+      const foundImages = await this.findNextImages(this.currentUpwardURI, moreImageLimit);
       console.log(`Found ${foundImages} more next images out of ${moreImageLimit} limit`);
 
       // If we found nothing, try looking for previous images instead
-      if (foundImages === 0 && this.canContinueCrawlingDown) {
+      if (foundImages === 0 && this.canContinueCrawlingDown && this.currentDownwardURI) {
         console.log("No more next images found, searching for previous images instead");
-        await this.findPreviousImages(this.currentParsedURI, moreImageLimit);
+        await this.findPreviousImages(this.currentDownwardURI, moreImageLimit);
       }
     }
 
@@ -304,8 +308,8 @@ export class SequenceManager {
             uri: prevURI
           });
 
-          // Save the current URI for load more operation
-          this.currentParsedURI = { ...currentParsedURI };
+          // Save the downward position for load more operation
+          this.currentDownwardURI = { ...currentParsedURI };
         } else {
           countTries++;
           if (countTries >= 10) {
@@ -319,8 +323,8 @@ export class SequenceManager {
             uri: prevURI
           });
 
-          // Save the current URI for load more operation even when skipping
-          this.currentParsedURI = { ...currentParsedURI };
+          // Save the downward position for load more operation even when skipping
+          this.currentDownwardURI = { ...currentParsedURI };
         }
       } else {
         this.canContinueCrawlingDown = false;
@@ -370,8 +374,8 @@ export class SequenceManager {
             uri: nextURI
           });
 
-          // Save the current URI for load more operation
-          this.currentParsedURI = { ...currentParsedURI };
+          // Save the upward position for load more operation
+          this.currentUpwardURI = { ...currentParsedURI };
         } else {
           countTries++;
           if (countTries >= 10) {
@@ -385,8 +389,8 @@ export class SequenceManager {
             uri: nextURI
           });
 
-          // Save the current URI for load more operation even when skipping
-          this.currentParsedURI = { ...currentParsedURI };
+          // Save the upward position for load more operation even when skipping
+          this.currentUpwardURI = { ...currentParsedURI };
         }
       } else {
         this.canContinueCrawlingUp = false;
