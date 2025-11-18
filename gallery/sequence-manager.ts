@@ -318,6 +318,9 @@ export class SequenceManager {
             action: MessageActions.PARSE_URI,
             uri: prevURI
           });
+
+          // Save the current URI for load more operation even when skipping
+          this.currentParsedURI = { ...currentParsedURI };
         }
       } else {
         this.canContinueCrawlingDown = false;
@@ -381,6 +384,9 @@ export class SequenceManager {
             action: MessageActions.PARSE_URI,
             uri: nextURI
           });
+
+          // Save the current URI for load more operation even when skipping
+          this.currentParsedURI = { ...currentParsedURI };
         }
       } else {
         this.canContinueCrawlingUp = false;
