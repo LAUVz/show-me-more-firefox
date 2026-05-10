@@ -17,7 +17,7 @@ A modernized version of the classic Firefox addon "Show Me More" that helps you 
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v14 or higher)
+- [Node.js](https://nodejs.org/) (v20 or higher)
 - [npm](https://www.npmjs.com/) (usually comes with Node.js)
 
 ### Installation
